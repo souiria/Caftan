@@ -1,0 +1,6 @@
+@import "tailwindcss";
+
+/* Tu peux aussi ajouter un style de base pour le fond de l'application */
+body {
+  background-color: #f8fafc;
+}

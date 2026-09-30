@@ -1,0 +1,172 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "./generated/client"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+// ==========================================
+// 1. UTILISATEURS & SECURITÉ
+// ==========================================
+model User {
+  id           String   @id @default(uuid())
+  username     String   @unique
+  passwordHash String
+  role         String // "SUPER_ADMIN", "USER_VENTE", "USER_LOCATION"
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+
+  sales        Sale[]
+  reservations Reservation[]
+  auditLogs    AuditLog[]
+}
+
+// ==========================================
+// 2. CATALOGUE (Produits abstraits)
+// ==========================================
+model Product {
+  id          String  @id @default(uuid())
+  name        String // ex: "Takchita"
+  type        String // ex: "Mlifa"
+  description String?
+
+  variants ProductVariant[]
+}
+
+model ProductVariant {
+  id        String  @id @default(uuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+
+  color String // ex: "Rouge"
+  size  String // ex: "Standard", "M", "XL"
+
+  purchasePrice Float? // Caché aux users normaux
+  salePrice     Float?
+  rentPrice     Float?
+  priceStatus   String  @default("PENDING") // "PENDING" ou "ACTIVE"
+  imagePath     String? // <--- AJOUTE CETTE LIGNE ICI
+
+  stockItems StockItem[]
+}
+
+// ==========================================
+// 3. STOCK PHYSIQUE (Articles uniques avec code-barres)
+// ==========================================
+model StockItem {
+  id        String         @id @default(uuid())
+  barcode   String         @unique // ex: TAK-MLI-STD-ROU-001
+  variantId String
+  variant   ProductVariant @relation(fields: [variantId], references: [id])
+
+  stockType String // "SALE" ou "RENT"
+  status    String @default("AVAILABLE") // "AVAILABLE", "RESERVED", "RENTED", "SOLD"
+
+  addedDate DateTime @default(now())
+
+  saleItems        SaleItem[]
+  reservationItems ReservationItem[]
+  stockMovements   StockMovement[]
+}
+
+model StockMovement {
+  id          String    @id @default(uuid())
+  stockItemId String
+  stockItem   StockItem @relation(fields: [stockItemId], references: [id])
+  type        String // "ENTRY", "TRANSFER_TO_RENT", "TRANSFER_TO_SALE"
+  userId      String
+  date        DateTime  @default(now())
+}
+
+// ==========================================
+// 4. VENTES
+// ==========================================
+model Sale {
+  id             String @id @default(uuid())
+  ticketNumber   String @unique
+  totalAmount    Float
+  discountAmount Float  @default(0)
+  finalAmount    Float
+  paymentMethod  String // "CASH", "CARD"
+  status         String @default("COMPLETED")
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+
+  items SaleItem[]
+}
+
+model SaleItem {
+  id     String @id @default(uuid())
+  saleId String
+  sale   Sale   @relation(fields: [saleId], references: [id])
+
+  stockItemId String
+  stockItem   StockItem @relation(fields: [stockItemId], references: [id])
+
+  appliedPrice Float // Prix au moment exact de la vente
+}
+
+// ==========================================
+// 5. LOCATIONS & RÉSERVATIONS
+// ==========================================
+model Customer {
+  id           String        @id @default(uuid())
+  cin          String        @unique // <--- Ajout de la CIN unique
+  fullName     String
+  phone        String?
+  reservations Reservation[]
+}
+
+model Reservation {
+  id             String @id @default(uuid())
+  reservationNum String @unique
+
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id])
+
+  startDate        DateTime
+  endDate          DateTime
+  actualReturnDate DateTime?
+
+  totalAmount     Float
+  advanceAmount   Float
+  remainingAmount Float
+
+  status String // "RESERVED", "ACTIVE_RENT", "COMPLETED"
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+
+  items ReservationItem[]
+}
+
+model ReservationItem {
+  id            String      @id @default(uuid())
+  reservationId String
+  reservation   Reservation @relation(fields: [reservationId], references: [id])
+
+  stockItemId String
+  stockItem   StockItem @relation(fields: [stockItemId], references: [id])
+
+  appliedRentPrice Float // Prix de location fixé au moment de la résa
+}
+
+// ==========================================
+// 6. HISTORIQUE & AUDIT LOGS (Sécurité)
+// ==========================================
+model AuditLog {
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  action     String
+  entityName String
+  entityId   String
+  details    String
+  timestamp  DateTime @default(now())
+}
