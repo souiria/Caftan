@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Toaster } from 'react-hot-toast'
 import LoginScreen from './screens/LoginScreen'
 import ProductsScreen from './screens/ProductsScreen'
 import DashboardScreen from './screens/DashboardScreen'
@@ -6,6 +7,9 @@ import POSScreen from './screens/POSScreen'
 import RentalsScreen from './screens/RentalsScreen'
 import StockScreen from './screens/StockScreen'
 import UsersScreen from './screens/UsersScreen'
+import SalesHistoryScreen from './screens/SalesHistoryScreen'
+import ReportsScreen from './screens/ReportsScreen'
+import SettingsScreen from './screens/SettingsScreen' // 🔴 AJOUT de l'import
 
 export default function App() {
   // On initialise avec ce qui est déjà sauvegardé dans le sessionStorage (effacé à la fermeture de l'app)
@@ -31,21 +35,26 @@ export default function App() {
     return <LoginScreen onLogin={handleLogin} />
   }
 
-  // ROUTEUR SIMPLIFIÉ (Plus aucun paramètre envoyé !)
+  // ROUTEUR SIMPLIFIÉ
   const renderScreen = () => {
     switch (currentScreen) {
       case 'dashboard': return <DashboardScreen />
       case 'pos': return <POSScreen />
+      case 'history': return <SalesHistoryScreen />
       case 'rentals': return <RentalsScreen />
       case 'stock': return <StockScreen />
       case 'products': return <ProductsScreen />
+      case 'reports': return currentUser.role === 'SUPER_ADMIN' ? <ReportsScreen /> : <DashboardScreen />
       case 'users': return currentUser.role === 'SUPER_ADMIN' ? <UsersScreen /> : <DashboardScreen />
+      case 'settings': return currentUser.role === 'SUPER_ADMIN' ? <SettingsScreen /> : <DashboardScreen /> // 🔴 ROUTE AJOUTÉE
       default: return <DashboardScreen />
     }
   }
 
   return (
     <div className="flex h-screen bg-slate-50 text-slate-800 font-sans overflow-hidden">
+      {/* Conteneur global pour les notifications non bloquantes */}
+      <Toaster position="top-center" reverseOrder={false} />
       
       {/* SIDEBAR */}
       <div className="w-64 bg-slate-900 text-white p-6 flex flex-col shadow-xl z-10 print:hidden">
@@ -60,13 +69,24 @@ export default function App() {
           <button onClick={() => setCurrentScreen('rentals')} className={`w-full text-left px-4 py-3 rounded-xl font-semibold transition-colors ${currentScreen === 'rentals' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}>Location & Planning</button>
           <button onClick={() => setCurrentScreen('stock')} className={`w-full text-left px-4 py-3 rounded-xl font-semibold transition-colors ${currentScreen === 'stock' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}>Gestion Stock</button>
           <button onClick={() => setCurrentScreen('products')} className={`w-full text-left px-4 py-3 rounded-xl font-semibold transition-colors ${currentScreen === 'products' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}>Produits & Variantes</button>
-
+          <button onClick={() => setCurrentScreen('history')} className={`w-full text-left px-4 py-3 rounded-xl font-semibold transition-colors ${currentScreen === 'history' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}>Historique & Livraisons</button>
+          
           {/* ADMIN SEULEMENT */}
           {currentUser.role === 'SUPER_ADMIN' && (
             <div className="pt-4 mt-4 border-t border-slate-800">
               <p className="text-[10px] font-black tracking-widest text-slate-500 uppercase mb-2 ml-4">Administration</p>
-              <button onClick={() => setCurrentScreen('users')} className={`w-full text-left px-4 py-3 rounded-xl font-semibold transition-colors flex items-center justify-between ${currentScreen === 'users' ? 'bg-emerald-600 text-white shadow-md' : 'text-slate-400 hover:bg-slate-800 hover:text-emerald-400'}`}>
+              
+              <button onClick={() => setCurrentScreen('users')} className={`w-full text-left px-4 py-3 rounded-xl font-semibold transition-colors flex items-center justify-between mb-2 ${currentScreen === 'users' ? 'bg-emerald-600 text-white shadow-md' : 'text-slate-400 hover:bg-slate-800 hover:text-emerald-400'}`}>
                 <span>Équipe & Accès</span>
+              </button>
+              
+              <button onClick={() => setCurrentScreen('reports')} className={`w-full text-left px-4 py-3 rounded-xl font-semibold transition-colors flex items-center justify-between mb-2 ${currentScreen === 'reports' ? 'bg-emerald-600 text-white shadow-md' : 'text-slate-400 hover:bg-slate-800 hover:text-emerald-400'}`}>
+                <span>Rapports & Bénéfices</span>
+              </button>
+
+              {/* 🔴 BOUTON POUR SETTINGS */}
+              <button onClick={() => setCurrentScreen('settings')} className={`w-full text-left px-4 py-3 rounded-xl font-semibold transition-colors flex items-center justify-between ${currentScreen === 'settings' ? 'bg-emerald-600 text-white shadow-md' : 'text-slate-400 hover:bg-slate-800 hover:text-emerald-400'}`}>
+                <span>Données & Paramètres</span>
               </button>
             </div>
           )}

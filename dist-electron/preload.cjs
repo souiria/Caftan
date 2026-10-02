@@ -34,7 +34,27 @@ try {
     // ==========================================
     getDashboardStats: () => electron.ipcRenderer.invoke("get-dashboard-stats"),
     // CAISSE
-    createSale: (data) => electron.ipcRenderer.invoke("create-sale", data)
+    createSale: (data) => electron.ipcRenderer.invoke("create-sale", data),
+    // CLIENTS
+    getCustomers: () => electron.ipcRenderer.invoke("get-customers"),
+    // VENTES & HISTORIQUE
+    getSales: () => electron.ipcRenderer.invoke("get-sales"),
+    updateSaleStatus: (data) => electron.ipcRenderer.invoke("update-sale-status", data),
+    // RAPPORTS
+    getReportsData: (data) => electron.ipcRenderer.invoke("get-reports-data", data),
+    getMissingPurchasePrices: () => electron.ipcRenderer.invoke("get-missing-purchase-prices"),
+    // PARAMÈTRES (CATÉGORIES & TISSUS)
+    // PARAMÈTRES (CATÉGORIES & TISSUS)
+    getCategories: () => electron.ipcRenderer.invoke("get-categories"),
+    addCategory: (name) => electron.ipcRenderer.invoke("add-category", name),
+    deleteCategory: (id) => electron.ipcRenderer.invoke("delete-category", id),
+    getFabrics: () => electron.ipcRenderer.invoke("get-fabrics"),
+    addFabric: (name) => electron.ipcRenderer.invoke("add-fabric", name),
+    deleteFabric: (id) => electron.ipcRenderer.invoke("delete-fabric", id),
+    // GESTION DES CLIENTS
+    addCustomer: (data) => electron.ipcRenderer.invoke("add-customer", data),
+    updateCustomer: (data) => electron.ipcRenderer.invoke("update-customer", data),
+    deleteCustomer: (id) => electron.ipcRenderer.invoke("delete-customer", id)
   });
   console.log("✅ window.api EXPOSED SUCCESSFULLY");
 } catch (error) {

@@ -7,10 +7,13 @@ const Icons = {
   Alert: () => <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>,
   ShoppingBag: () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>,
   Clock: () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>,
-  Check: () => <svg className="w-8 h-8 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> // L'icône Check a bien été ajoutée ici
+  Check: () => <svg className="w-8 h-8 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
 }
 
 export default function DashboardScreen() {
+  const currentUser = JSON.parse(sessionStorage.getItem('caftan_current_user') || '{}')
+  const isAdmin = currentUser.role === 'SUPER_ADMIN'
+
   const [stats, setStats] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
 
@@ -20,7 +23,11 @@ export default function DashboardScreen() {
 
   const loadStats = async () => {
     try {
-      const data = await (window as any).api.getDashboardStats()
+      // On envoie l'ID et le rôle pour filtrer les données
+      const data = await (window as any).api.getDashboardStats({ 
+        userId: currentUser.id, 
+        role: currentUser.role 
+      })
       setStats(data)
     } catch (error) {
       console.error("Erreur de chargement des stats:", error)
@@ -30,26 +37,35 @@ export default function DashboardScreen() {
   }
 
   if (isLoading) {
-    return <div className="max-w-7xl mx-auto h-[80vh] flex items-center justify-center text-slate-400 font-bold animate-pulse">Chargement des données du tableau de bord...</div>
+    return <div className="max-w-7xl mx-auto h-[80vh] flex items-center justify-center text-slate-400 font-bold animate-pulse">Chargement des données...</div>
   }
 
   return (
     <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500 pb-10">
       
-      {/* HEADER */}
+      {/* HEADER AVEC MESSAGE DE BIENVENUE */}
       <div className="flex justify-between items-end border-b border-slate-200 pb-4">
         <div>
-          <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">Tableau de Bord</h2>
-          <p className="text-slate-500 mt-1 font-medium">Vue exécutive des performances de la boutique.</p>
+          <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-3">
+            Bonjour, {currentUser.username}
+            <span className={`text-[10px] uppercase tracking-wider px-2 py-1 rounded-md font-black ${isAdmin ? 'bg-emerald-100 text-emerald-700' : 'bg-indigo-100 text-indigo-700'}`}>
+              {isAdmin ? 'Mode Administrateur' : 'Mode Caisse'}
+            </span>
+          </h2>
+          <p className="text-slate-500 mt-1 font-medium">
+            {isAdmin ? "Voici les performances globales de la boutique aujourd'hui." : "Voici vos performances et statistiques pour aujourd'hui."}
+          </p>
         </div>
-        <div className="text-right">
-          <p className="text-sm font-bold text-slate-400 uppercase tracking-wider">Date d'aujourd'hui</p>
-          <p className="text-lg font-black text-indigo-600">{new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</p>
+        <div className="text-right bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
+          <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Aujourd'hui</p>
+          <p className="text-base font-black text-indigo-600 capitalize">
+            {new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
+          </p>
         </div>
       </div>
 
       {/* ==========================================
-          KPIs PRINCIPAUX (CARTES)
+          KPIs PRINCIPAUX (Adaptés selon le rôle)
       ========================================== */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden group">
@@ -57,8 +73,8 @@ export default function DashboardScreen() {
           <div className="flex items-center space-x-4">
             <div className="p-3 bg-emerald-50 rounded-xl shadow-inner border border-emerald-100"><Icons.TrendingUp /></div>
             <div>
-              <p className="text-xs font-black text-slate-400 uppercase tracking-wider">Chiffre d'Affaires</p>
-              <h3 className="text-3xl font-black text-slate-800">{stats?.revenue?.toLocaleString('fr-FR')} <span className="text-lg text-emerald-500">DH</span></h3>
+              <p className="text-xs font-black text-slate-400 uppercase tracking-wider">{isAdmin ? "CA Global (Jour)" : "Votre CA (Jour)"}</p>
+              <h3 className="text-3xl font-black text-slate-800">{stats?.todayRevenue?.toLocaleString('fr-FR') || 0} <span className="text-lg text-emerald-500">DH</span></h3>
             </div>
           </div>
         </div>
@@ -79,19 +95,21 @@ export default function DashboardScreen() {
           <div className="flex items-center space-x-4">
             <div className="p-3 bg-blue-50 rounded-xl shadow-inner border border-blue-100"><Icons.Box /></div>
             <div>
-              <p className="text-xs font-black text-slate-400 uppercase tracking-wider">Articles Libres</p>
+              <p className="text-xs font-black text-slate-400 uppercase tracking-wider">Stock Disponible</p>
               <h3 className="text-3xl font-black text-slate-800">{stats?.totalStock || 0} <span className="text-lg text-blue-500">pièces</span></h3>
             </div>
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-red-50 to-orange-50 p-6 rounded-2xl border border-red-100 shadow-sm relative overflow-hidden group">
-          <div className="absolute top-0 right-0 p-6 opacity-10 text-red-500 transform translate-x-4 -translate-y-4 group-hover:scale-110 transition-transform duration-500"><Icons.Alert /></div>
+        <div className={`p-6 rounded-2xl border shadow-sm relative overflow-hidden group ${stats?.lateRentals?.length > 0 ? 'bg-gradient-to-br from-red-50 to-orange-50 border-red-100' : 'bg-white border-slate-100'}`}>
+          <div className={`absolute top-0 right-0 p-6 opacity-10 transform translate-x-4 -translate-y-4 group-hover:scale-110 transition-transform duration-500 ${stats?.lateRentals?.length > 0 ? 'text-red-500' : 'text-slate-300'}`}><Icons.Alert /></div>
           <div className="flex items-center space-x-4">
-            <div className="p-3 bg-white rounded-xl shadow-sm border border-red-200"><Icons.Alert /></div>
+            <div className={`p-3 rounded-xl shadow-sm border ${stats?.lateRentals?.length > 0 ? 'bg-white border-red-200' : 'bg-slate-50 border-slate-200'}`}><Icons.Alert /></div>
             <div>
-              <p className="text-xs font-black text-red-400 uppercase tracking-wider">Retards Critiques</p>
-              <h3 className="text-3xl font-black text-red-600">{stats?.lateRentals?.length || 0} <span className="text-lg text-red-400">alertes</span></h3>
+              <p className={`text-xs font-black uppercase tracking-wider ${stats?.lateRentals?.length > 0 ? 'text-red-400' : 'text-slate-400'}`}>Retards Critiques</p>
+              <h3 className={`text-3xl font-black ${stats?.lateRentals?.length > 0 ? 'text-red-600' : 'text-slate-800'}`}>
+                {stats?.lateRentals?.length || 0} <span className={`text-lg ${stats?.lateRentals?.length > 0 ? 'text-red-400' : 'text-slate-400'}`}>alertes</span>
+              </h3>
             </div>
           </div>
         </div>
@@ -100,7 +118,7 @@ export default function DashboardScreen() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
         {/* ==========================================
-            URGENCES (CÔTÉ GAUCHE - 1 COLONNE)
+            URGENCES (CÔTÉ GAUCHE)
         ========================================== */}
         <div className="lg:col-span-1 space-y-6">
           <div className="bg-white rounded-2xl border border-red-100 shadow-sm overflow-hidden flex flex-col h-[400px]">
@@ -128,7 +146,7 @@ export default function DashboardScreen() {
                           <p className="font-bold text-slate-800">{rental.customer.fullName}</p>
                           <span className="text-[10px] font-black bg-red-100 text-red-700 px-2 py-0.5 rounded uppercase">{lateDays} jours de retard</span>
                         </div>
-                        <p className="text-xs text-slate-500 font-mono mb-2">📞 {rental.customer.cin}</p>
+                        <p className="text-xs text-slate-500 font-mono mb-2">📞 {rental.customer.phone || rental.customer.cin}</p>
                         <p className="text-xs font-bold text-slate-700 bg-slate-50 p-2 rounded truncate">
                           {rental.items[0]?.stockItem?.variant?.product?.name} ({rental.items[0]?.stockItem?.barcode})
                         </p>
@@ -142,13 +160,14 @@ export default function DashboardScreen() {
         </div>
 
         {/* ==========================================
-            ACTIVITÉ RÉCENTE (CÔTÉ DROIT - 2 COLONNES)
+            ACTIVITÉ RÉCENTE (CÔTÉ DROIT)
         ========================================== */}
         <div className="lg:col-span-2">
           <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden h-[400px] flex flex-col">
             <div className="p-5 border-b border-slate-100 flex justify-between items-center">
-              <h3 className="text-sm font-black text-slate-800 uppercase tracking-wider">Dernières Transactions</h3>
-              <button className="text-indigo-600 text-xs font-bold hover:underline">Voir tout l'historique</button>
+              <h3 className="text-sm font-black text-slate-800 uppercase tracking-wider">
+                {isAdmin ? "Dernières Transactions de l'Équipe" : "Vos Dernières Transactions"}
+              </h3>
             </div>
             
             <div className="flex-1 overflow-y-auto">
@@ -157,7 +176,7 @@ export default function DashboardScreen() {
                   <tr>
                     <th className="p-4 font-bold">Type</th>
                     <th className="p-4 font-bold">Description</th>
-                    <th className="p-4 font-bold">Date & Heure</th>
+                    <th className="p-4 font-bold">Heure</th>
                     <th className="p-4 font-bold text-right">Montant</th>
                   </tr>
                 </thead>
@@ -165,7 +184,7 @@ export default function DashboardScreen() {
                   {stats?.recentActivity?.length === 0 ? (
                     <tr>
                       <td colSpan={4} className="p-10 text-center text-slate-400 italic">
-                        Aucune transaction pour le moment.
+                        Aucune transaction aujourd'hui.
                       </td>
                     </tr>
                   ) : (
@@ -184,7 +203,7 @@ export default function DashboardScreen() {
                         </td>
                         <td className="p-4 font-bold text-slate-700">{activity.title}</td>
                         <td className="p-4 text-slate-500 text-xs">
-                          {new Date(activity.date).toLocaleDateString('fr-FR')} à {new Date(activity.date).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                          {new Date(activity.date).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
                         </td>
                         <td className="p-4 text-right font-black text-slate-800 text-base">
                           {activity.amount} <span className="text-xs text-slate-400 font-bold">DH</span>

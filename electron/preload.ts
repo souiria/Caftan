@@ -40,7 +40,27 @@ try {
     getDashboardStats: () => ipcRenderer.invoke('get-dashboard-stats'),
     // CAISSE
     createSale: (data: any) => ipcRenderer.invoke('create-sale', data),
-
+// CLIENTS
+    getCustomers: () => ipcRenderer.invoke('get-customers'),
+    // VENTES & HISTORIQUE
+    getSales: () => ipcRenderer.invoke('get-sales'),
+    updateSaleStatus: (data: any) => ipcRenderer.invoke('update-sale-status', data),
+    // RAPPORTS
+    getReportsData: (data: any) => ipcRenderer.invoke('get-reports-data', data),
+    getMissingPurchasePrices: () => ipcRenderer.invoke('get-missing-purchase-prices'),
+    // PARAMÈTRES (CATÉGORIES & TISSUS)
+   // PARAMÈTRES (CATÉGORIES & TISSUS)
+    getCategories: () => ipcRenderer.invoke('get-categories'),
+    addCategory: (name: string) => ipcRenderer.invoke('add-category', name),
+    deleteCategory: (id: string) => ipcRenderer.invoke('delete-category', id),
+    
+    getFabrics: () => ipcRenderer.invoke('get-fabrics'),
+    addFabric: (name: string) => ipcRenderer.invoke('add-fabric', name),
+    deleteFabric: (id: string) => ipcRenderer.invoke('delete-fabric', id),
+    // GESTION DES CLIENTS
+    addCustomer: (data: any) => ipcRenderer.invoke('add-customer', data),
+    updateCustomer: (data: any) => ipcRenderer.invoke('update-customer', data),
+    deleteCustomer: (id: string) => ipcRenderer.invoke('delete-customer', id),
   })
   
   console.log('✅ window.api EXPOSED SUCCESSFULLY')

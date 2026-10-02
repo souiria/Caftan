@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import Barcode from 'react-barcode'
+import toast from 'react-hot-toast'
 
 const Icons = {
   Plus: () => <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>,
@@ -7,7 +8,9 @@ const Icons = {
   Image: () => <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>,
   Edit: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>,
   Print: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>,
-  Transfer: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" /></svg>
+  Transfer: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" /></svg>,
+  Alert: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>,
+  Settings: () => <svg className="w-4 h-4 text-slate-500 hover:text-indigo-600 cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
 }
 
 type VariantForm = { color: string; size: string; quantity: number; imagePath: string; previewUrl: string }
@@ -15,17 +18,21 @@ type StockItem = { id: string; barcode: string; variantId: string; stockType: st
 type ProductVariant = { id: string; productId: string; color: string; size: string; purchasePrice: number | null; salePrice: number | null; rentPrice: number | null; priceStatus: string; imagePath: string | null; stockItems: StockItem[] }
 type Product = { id: string; name: string; type: string; description: string | null; variants: ProductVariant[] }
 
-
-// LA MODIFICATION EST ICI : Plus de paramètres, on lit le localStorage
 export default function ProductsScreen() {
-  const currentUser = JSON.parse(localStorage.getItem('caftan_current_user') || '{}')
+  const currentUser = JSON.parse(sessionStorage.getItem('caftan_current_user') || localStorage.getItem('caftan_current_user') || '{}')
   const currentUserRole = currentUser.role || 'USER'
 
   const [isLoading, setIsLoading] = useState(false)
   const [products, setProducts] = useState<Product[]>([])
 
-  const [name, setName] = useState('Takchita')
-  const [type, setType] = useState('Mlifa')
+  const [dbCategories, setDbCategories] = useState<{id: string, name: string}[]>([])
+  const [dbFabrics, setDbFabrics] = useState<{id: string, name: string}[]>([])
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false)
+  const [settingsTab, setSettingsTab] = useState<'CATEGORY' | 'FABRIC'>('CATEGORY')
+  const [newItemName, setNewItemName] = useState('')
+
+  const [name, setName] = useState('')
+  const [type, setType] = useState('')
   const [description, setDescription] = useState('')
   const [stockType, setStockType] = useState('SALE')
   const [purchasePrice, setPurchasePrice] = useState('')
@@ -41,17 +48,66 @@ export default function ProductsScreen() {
   const [transferDirection, setTransferDirection] = useState('SALE_TO_RENT')
 
   const [printData, setPrintData] = useState<{product: Product, variant: ProductVariant, items: StockItem[]} | null>(null)
+  const [showMissingPriceFilter, setShowMissingPriceFilter] = useState(false)
 
-  useEffect(() => { loadProducts() }, [])
+  useEffect(() => { 
+    loadProducts()
+    loadDropdownSettings()
+  }, [])
 
   const loadProducts = async () => {
     try {
       const data = await (window as any).api.getProducts()
       setProducts(data)
-    } catch (error) { console.error('Erreur', error) }
+    } catch (error) { console.error('Erreur produits', error) }
   }
 
-  const getSplitTableRows = () => {
+  const loadDropdownSettings = async () => {
+    try {
+      if (!(window as any).api.getCategories) return;
+      const cats = await (window as any).api.getCategories()
+      const fabs = await (window as any).api.getFabrics()
+      setDbCategories(cats)
+      setDbFabrics(fabs)
+      
+      if (cats.length > 0) setName(prev => prev || cats[0].name)
+      if (fabs.length > 0) setType(prev => prev || fabs[0].name)
+    } catch (error) { console.error('Erreur chargement paramètres', error) }
+  }
+
+  const handleAddSetting = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!newItemName.trim()) return
+
+    try {
+      if (settingsTab === 'CATEGORY') {
+        await (window as any).api.addCategory(newItemName.trim())
+        toast.success("Catégorie ajoutée !")
+      } else {
+        await (window as any).api.addFabric(newItemName.trim())
+        toast.success("Tissu ajouté !")
+      }
+      setNewItemName('')
+      await loadDropdownSettings()
+    } catch (error) {
+      toast.error("Erreur, ce nom existe peut-être déjà.")
+    }
+  }
+
+  const handleDeleteSetting = async (id: string, tab: 'CATEGORY' | 'FABRIC') => {
+    if (!window.confirm("Supprimer cet élément de la liste de choix ? (Les anciens produits le garderont)")) return
+    try {
+      if (tab === 'CATEGORY') {
+        await (window as any).api.deleteCategory(id)
+      } else {
+        await (window as any).api.deleteFabric(id)
+      }
+      toast.success("Élément supprimé !")
+      await loadDropdownSettings()
+    } catch (error) { toast.error("Erreur de suppression.") }
+  }
+
+  const tableRows = useMemo(() => {
     const rows: any[] = []
     products.forEach(p => {
       p.variants?.forEach(v => {
@@ -64,9 +120,16 @@ export default function ProductsScreen() {
       })
     })
     return rows
-  }
+  }, [products])
 
-  const tableRows = getSplitTableRows()
+  const filteredRows = useMemo(() => {
+    return tableRows.filter(row => {
+      if (showMissingPriceFilter && currentUserRole === 'SUPER_ADMIN') {
+        return !row.variant.purchasePrice || row.variant.purchasePrice <= 0;
+      }
+      return true;
+    })
+  }, [tableRows, showMissingPriceFilter, currentUserRole])
 
   const availableForTransfer = transferVariant?.stockItems.filter((i:any) => 
     i.status === 'AVAILABLE' && i.stockType === (transferDirection === 'SALE_TO_RENT' ? 'SALE' : 'RENT')
@@ -92,11 +155,22 @@ export default function ProductsScreen() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (variants.length === 0) return alert('Veuillez ajouter au moins une variante.')
+    if (variants.length === 0) return toast.error('Veuillez ajouter au moins une variante.')
+    if (!name) return toast.error("Veuillez sélectionner un nom de produit.")
+    if (!type) return toast.error("Veuillez sélectionner un type de tissu.")
+
+    // 🔴 VÉRIFICATION DU PRIX OBLIGATOIRE POUR TOUS LES UTILISATEURS
+    if (stockType === 'SALE' && (!salePrice || Number(salePrice) <= 0)) {
+      return toast.error("Le prix de vente est obligatoire pour un article destiné à la vente.")
+    }
+    if (stockType === 'RENT' && (!rentPrice || Number(rentPrice) <= 0)) {
+      return toast.error("Le prix de location est obligatoire pour un article destiné à la location.")
+    }
+
     setIsLoading(true)
 
     try {
-      const newProduct = await (window as any).api.createProduct({ name, type, description: description || null })
+      const newProduct = await (window as any).api.createProduct({ name: name.trim(), type: type.trim(), description: description || null })
       const pCode = name.substring(0, 3).toUpperCase()
       const tCode = type.substring(0, 3).toUpperCase()
 
@@ -117,11 +191,15 @@ export default function ProductsScreen() {
           rentPrice: rentPrice.trim() !== '' ? Number(rentPrice) : null
         })
       }
-      alert('Produit généré avec succès !')
+      toast.success('Produit généré avec succès !')
       setVariants([{ color: '', size: 'Standard', quantity: 1, imagePath: '', previewUrl: '' }])
       setPurchasePrice(''); setSalePrice(''); setRentPrice('');
       await loadProducts()
-    } catch (error: any) { alert('Erreur : ' + error.message) } finally { setIsLoading(false) }
+    } catch (error: any) { 
+      toast.error('Erreur : ' + error.message) 
+    } finally { 
+      setIsLoading(false) 
+    }
   }
 
   const openEditModal = (v: ProductVariant) => {
@@ -145,6 +223,10 @@ export default function ProductsScreen() {
 
   const handleEditSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!editData.salePrice || Number(editData.salePrice) <= 0) {
+      return toast.error("Le prix de vente ne peut pas être vide ou à zéro.")
+    }
+
     setIsLoading(true)
     try {
       let finalImagePath = editData.imagePath
@@ -159,16 +241,20 @@ export default function ProductsScreen() {
         newQuantity: Number(editData.quantity),
         imagePath: finalImagePath
       })
-      alert('Produit mis à jour avec succès !')
+      toast.success('Produit mis à jour avec succès !')
       setEditingVariant(null)
       await loadProducts()
-    } catch (error: any) { alert("Erreur :\n" + error.message) } finally { setIsLoading(false) }
+    } catch (error: any) { 
+      toast.error("Erreur :\n" + error.message) 
+    } finally { 
+      setIsLoading(false) 
+    }
   }
 
   const handleTransferSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!transferVariant) return
-    if (transferQty <= 0 || transferQty > availableForTransfer) return alert("Quantité invalide ou insuffisante.")
+    if (transferQty <= 0 || transferQty > availableForTransfer) return toast.error("Quantité invalide ou insuffisante.")
     setIsLoading(true)
     try {
       await (window as any).api.transferStock({
@@ -176,14 +262,54 @@ export default function ProductsScreen() {
         fromType: transferDirection === 'SALE_TO_RENT' ? 'SALE' : 'RENT',
         toType: transferDirection === 'SALE_TO_RENT' ? 'RENT' : 'SALE'
       })
-      alert('Transfert de stock réussi !')
+      toast.success('Transfert de stock réussi !')
       setTransferVariant(null)
       await loadProducts() 
-    } catch (error: any) { alert("Erreur de transfert : " + error.message) } finally { setIsLoading(false) }
+    } catch (error: any) { 
+      toast.error("Erreur de transfert : " + error.message) 
+    } finally { 
+      setIsLoading(false) 
+    }
   }
 
   return (
     <>
+      {isSettingsModalOpen && currentUserRole === 'SUPER_ADMIN' && (
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 print:hidden">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+              <h3 className="font-black text-slate-800 text-lg">Gestion des Listes</h3>
+              <button onClick={() => setIsSettingsModalOpen(false)} className="text-slate-400 hover:text-slate-700 font-bold">✕</button>
+            </div>
+            
+            <div className="flex bg-slate-100 p-2">
+              <button onClick={() => setSettingsTab('CATEGORY')} className={`flex-1 py-2 text-xs font-bold rounded-lg ${settingsTab === 'CATEGORY' ? 'bg-white shadow text-indigo-600' : 'text-slate-500'}`}>Noms (Produits)</button>
+              <button onClick={() => setSettingsTab('FABRIC')} className={`flex-1 py-2 text-xs font-bold rounded-lg ${settingsTab === 'FABRIC' ? 'bg-white shadow text-indigo-600' : 'text-slate-500'}`}>Tissus (Types)</button>
+            </div>
+
+            <div className="p-5">
+              <form onSubmit={handleAddSetting} className="flex gap-2 mb-6">
+                <input type="text" value={newItemName} onChange={e => setNewItemName(e.target.value)} placeholder="Ajouter un élément..." className="flex-1 p-2 rounded-lg border border-slate-300 outline-none focus:border-indigo-500 text-sm font-medium" />
+                <button type="submit" className="bg-indigo-600 text-white px-4 rounded-lg font-bold hover:bg-indigo-700">+</button>
+              </form>
+
+              <div className="h-64 overflow-y-auto border border-slate-100 rounded-lg p-2 bg-slate-50 space-y-1">
+                {(settingsTab === 'CATEGORY' ? dbCategories : dbFabrics).length === 0 ? (
+                  <p className="text-center text-xs text-slate-400 py-10 italic">Aucun élément.</p>
+                ) : (
+                  (settingsTab === 'CATEGORY' ? dbCategories : dbFabrics).map(item => (
+                    <div key={item.id} className="flex justify-between items-center bg-white p-2 rounded border border-slate-100 shadow-sm">
+                      <span className="text-sm font-bold text-slate-700">{item.name}</span>
+                      <button onClick={() => handleDeleteSetting(item.id, settingsTab)} className="text-red-400 hover:text-red-600 p-1"><Icons.Trash /></button>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {printData && (
         <div className="hidden print:block absolute inset-0 bg-white z-[99999] text-black">
           <style>{`@media print { @page { size: A4; margin: 10mm; } body, html, #root { height: auto !important; overflow: visible !important; background: white !important; } .w-64 { display: none !important; } .flex-1 { margin: 0 !important; padding: 0 !important; overflow: visible !important; } }`}</style>
@@ -229,8 +355,8 @@ export default function ProductsScreen() {
                     <input type="number" value={editData.purchasePrice} onChange={e => setEditData({...editData, purchasePrice: e.target.value})} className="w-full p-2 rounded-lg border border-slate-300 mt-1 text-sm outline-none focus:border-indigo-500" />
                   </div>
                   <div>
-                    <label className="text-xs font-bold text-slate-500 uppercase">Prix Vente (DH)</label>
-                    <input type="number" value={editData.salePrice} onChange={e => setEditData({...editData, salePrice: e.target.value})} className="w-full p-2 rounded-lg border border-slate-300 mt-1 text-sm outline-none focus:border-indigo-500" />
+                    <label className="text-xs font-bold text-slate-500 uppercase">Prix Vente (DH) *</label>
+                    <input type="number" required value={editData.salePrice} onChange={e => setEditData({...editData, salePrice: e.target.value})} className="w-full p-2 rounded-lg border border-slate-300 mt-1 text-sm outline-none focus:border-indigo-500" />
                   </div>
                   <div>
                     <label className="text-xs font-bold text-slate-500 uppercase">Prix Location (DH)</label>
@@ -281,25 +407,39 @@ export default function ProductsScreen() {
           <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
             <h3 className="text-lg font-bold text-slate-800 mb-4 border-b pb-2">1. Informations Communes du Produit</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-4">
+              
               <div>
-                <label className="text-sm font-semibold text-slate-600">Produit</label>
-                <select value={name} onChange={e => setName(e.target.value)} className="w-full p-3 rounded-xl border border-slate-200 mt-1 bg-slate-50 outline-none focus:ring-2 focus:ring-indigo-200">
-                  <option value="Takchita">Takchita</option><option value="Kaftan">Kaftan</option><option value="Djelaba">Djelaba</option><option value="Jabador">Jabador</option>
+                <div className="flex justify-between items-center mb-1">
+                  <label className="text-sm font-semibold text-slate-600">Nom du Produit</label>
+                  {currentUserRole === 'SUPER_ADMIN' && <div onClick={() => { setSettingsTab('CATEGORY'); setIsSettingsModalOpen(true); }}><Icons.Settings /></div>}
+                </div>
+                <select value={name} onChange={e => setName(e.target.value)} required className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 outline-none focus:ring-2 focus:ring-indigo-200 font-bold text-slate-700">
+                  <option value="" disabled>-- Choisir --</option>
+                  {dbCategories.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
                 </select>
               </div>
+
               <div>
-                <label className="text-sm font-semibold text-slate-600">Type / Tissu</label>
-                <select value={type} onChange={e => setType(e.target.value)} className="w-full p-3 rounded-xl border border-slate-200 mt-1 bg-slate-50 outline-none focus:ring-2 focus:ring-indigo-200">
-                  <option value="Mlifa">Mlifa</option><option value="Moubra">Moubra</option><option value="Satin">Satin</option><option value="Jawhara">Jawhara</option>
+                <div className="flex justify-between items-center mb-1">
+                  <label className="text-sm font-semibold text-slate-600">Type / Tissu</label>
+                  {currentUserRole === 'SUPER_ADMIN' && <div onClick={() => { setSettingsTab('FABRIC'); setIsSettingsModalOpen(true); }}><Icons.Settings /></div>}
+                </div>
+                <select value={type} onChange={e => setType(e.target.value)} required className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 outline-none focus:ring-2 focus:ring-indigo-200 font-bold text-slate-700">
+                  <option value="" disabled>-- Choisir --</option>
+                  {dbFabrics.map(f => <option key={f.id} value={f.name}>{f.name}</option>)}
                 </select>
               </div>
+
               <div>
-                <label className="text-sm font-semibold text-slate-600">Description</label>
-                <input type="text" value={description} onChange={e => setDescription(e.target.value)} placeholder="Détails" className="w-full p-3 rounded-xl border border-slate-200 mt-1 bg-slate-50" />
+                <div className="flex justify-between items-center mb-1">
+                  <label className="text-sm font-semibold text-slate-600">Description</label>
+                </div>
+                <input type="text" value={description} onChange={e => setDescription(e.target.value)} placeholder="Détails (Optionnel)" className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 outline-none focus:ring-2 focus:ring-indigo-200" />
               </div>
             </div>
             
-            <div className={`grid grid-cols-1 gap-6 pt-4 border-t border-slate-100 ${currentUserRole === 'SUPER_ADMIN' ? 'md:grid-cols-4' : 'md:grid-cols-1'}`}>
+            {/* 🔴 MODIFICATION DE L'AFFICHAGE DES PRIX : Visibles par tout le monde, sauf Achat (réservé Admin) */}
+            <div className={`grid grid-cols-1 gap-6 pt-4 border-t border-slate-100 ${currentUserRole === 'SUPER_ADMIN' ? 'md:grid-cols-4' : 'md:grid-cols-3'}`}>
               <div>
                 <label className="text-sm font-semibold text-slate-600">Destination Stock</label>
                 <select value={stockType} onChange={e => setStockType(e.target.value)} className="w-full p-3 rounded-xl border border-slate-200 mt-1 bg-slate-50">
@@ -308,12 +448,21 @@ export default function ProductsScreen() {
               </div>
               
               {currentUserRole === 'SUPER_ADMIN' && (
-                <>
-                  <div><label className="text-sm font-semibold text-slate-600">Prix d'Achat</label><input type="number" min="0" value={purchasePrice} onChange={e => setPurchasePrice(e.target.value)} placeholder="DH" className="w-full p-3 rounded-xl border border-slate-200 mt-1 bg-slate-50" /></div>
-                  <div><label className="text-sm font-semibold text-slate-600">Prix de Vente</label><input type="number" min="0" value={salePrice} onChange={e => setSalePrice(e.target.value)} placeholder="DH" className="w-full p-3 rounded-xl border border-slate-200 mt-1 bg-slate-50" /></div>
-                  <div><label className="text-sm font-semibold text-slate-600">Prix de Location</label><input type="number" min="0" value={rentPrice} onChange={e => setRentPrice(e.target.value)} placeholder="DH" className="w-full p-3 rounded-xl border border-slate-200 mt-1 bg-slate-50" /></div>
-                </>
+                <div>
+                  <label className="text-sm font-semibold text-slate-600">Prix d'Achat</label>
+                  <input type="number" min="0" value={purchasePrice} onChange={e => setPurchasePrice(e.target.value)} placeholder="DH" className="w-full p-3 rounded-xl border border-slate-200 mt-1 bg-slate-50" />
+                </div>
               )}
+
+              <div>
+                <label className="text-sm font-semibold text-slate-600">Prix de Vente {stockType === 'SALE' ? '*' : ''}</label>
+                <input type="number" min="0" required={stockType === 'SALE'} value={salePrice} onChange={e => setSalePrice(e.target.value)} placeholder="DH" className={`w-full p-3 rounded-xl mt-1 bg-slate-50 outline-none focus:ring-2 focus:ring-indigo-200 ${stockType === 'SALE' ? 'border-2 border-indigo-300' : 'border border-slate-200'}`} />
+              </div>
+              
+              <div>
+                <label className="text-sm font-semibold text-slate-600">Prix de Location {stockType === 'RENT' ? '*' : ''}</label>
+                <input type="number" min="0" required={stockType === 'RENT'} value={rentPrice} onChange={e => setRentPrice(e.target.value)} placeholder="DH" className={`w-full p-3 rounded-xl mt-1 bg-slate-50 outline-none focus:ring-2 focus:ring-indigo-200 ${stockType === 'RENT' ? 'border-2 border-indigo-300' : 'border border-slate-200'}`} />
+              </div>
             </div>
           </div>
 
@@ -350,8 +499,22 @@ export default function ProductsScreen() {
         </form>
 
         <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden mt-10">
-          <div className="p-4 bg-slate-50 border-b border-slate-100">
+          <div className="p-4 bg-slate-50 border-b border-slate-100 flex justify-between items-center">
             <h3 className="font-bold text-slate-700">Catalogue Actuel (Regroupé par Destination)</h3>
+            
+            {currentUserRole === 'SUPER_ADMIN' && (
+              <button
+                onClick={() => setShowMissingPriceFilter(!showMissingPriceFilter)}
+                className={`text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-2 transition-colors ${
+                  showMissingPriceFilter
+                    ? 'bg-red-500 text-white shadow-md'
+                    : 'bg-red-50 text-red-600 hover:bg-red-100 border border-red-200'
+                }`}
+              >
+                <Icons.Alert />
+                {showMissingPriceFilter ? 'Afficher tout le catalogue' : 'Filtrer Prix Achat Manquant'}
+              </button>
+            )}
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
@@ -362,65 +525,85 @@ export default function ProductsScreen() {
                   <th className="p-4">Couleur / Taille</th>
                   <th className="p-4 text-center">Destination</th>
                   <th className="p-4 text-center">Qté</th>
-                  {currentUserRole === 'SUPER_ADMIN' && <th className="p-4 text-center">Prix (V/L)</th>}
+                  {/* 🔴 CHANGEMENT ICI : La colonne s'appelle différemment selon le rôle */}
+                  <th className="p-4 text-center">{currentUserRole === 'SUPER_ADMIN' ? 'Prix (A/V/L)' : 'Prix (V/L)'}</th>
                   <th className="p-4 text-center">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {tableRows.length === 0 ? (
-                  <tr><td colSpan={currentUserRole === 'SUPER_ADMIN' ? 7 : 6} className="p-8 text-center text-slate-400">Aucun produit généré.</td></tr>
+                {filteredRows.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="p-8 text-center text-slate-400">
+                      {showMissingPriceFilter ? "Aucun prix d'achat manquant ! Parfait." : "Aucun produit généré."}
+                    </td>
+                  </tr>
                 ) : (
-                  tableRows.map((row, idx) => (
-                    <tr key={`${row.variant.id}-${row.stockType}-${idx}`} className="hover:bg-slate-50 transition-colors">
-                      <td className="p-4">
-                        {row.variant.imagePath ? (
-                          <img src={row.variant.imagePath.startsWith('http') ? row.variant.imagePath : `file://${row.variant.imagePath}`} alt="Produit" className="w-10 h-10 rounded object-cover border border-slate-200" />
-                        ) : (
-                          <div className="w-10 h-10 bg-slate-100 border border-slate-200 rounded flex items-center justify-center text-xs text-slate-400">N/A</div>
-                        )}
-                      </td>
-                      <td className="p-4">
-                        <p className="font-bold text-slate-700">{row.product.name}</p>
-                        <p className="text-xs text-slate-400 font-mono">Base: {row.items.length > 0 ? row.items[0].barcode.substring(0, row.items[0].barcode.lastIndexOf('-')) : 'N/A'}</p>
-                      </td>
-                      <td className="p-4">
-                        <span className="font-bold text-slate-700">{row.variant.color}</span>
-                        <span className="text-slate-400 text-xs ml-2">({row.variant.size})</span>
-                      </td>
-                      <td className="p-4 text-center">
-                        <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${row.stockType === 'SALE' ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-100 text-blue-700'}`}>
-                          {row.stockType === 'SALE' ? 'Vente' : 'Location'}
-                        </span>
-                      </td>
-                      <td className="p-4 font-black text-slate-800 text-base text-center">{row.items.length}</td>
-                      
-                      {currentUserRole === 'SUPER_ADMIN' && (
-                        <td className="p-4 text-center text-[10px] font-bold text-slate-500">
-                          {row.variant.salePrice && <div>V: {row.variant.salePrice} DH</div>}
-                          {row.variant.rentPrice && <div>L: {row.variant.rentPrice} DH</div>}
-                        </td>
-                      )}
-                      
-                      <td className="p-4 text-center">
-                        <div className="flex items-center justify-center gap-2">
-                          <button onClick={() => handlePrint(row.product, row.variant, row.items)} className="p-2 bg-slate-100 text-slate-600 hover:bg-slate-800 hover:text-white rounded-lg transition-colors" title={`Imprimer codes ${row.stockType === 'SALE' ? 'Vente' : 'Location'}`}>
-                            <Icons.Print />
-                          </button>
-                          
-                          {currentUserRole === 'SUPER_ADMIN' && (
-                            <>
-                              <button onClick={() => { setTransferVariant(row.variant); setTransferQty(1); setTransferDirection(row.stockType === 'SALE' ? 'SALE_TO_RENT' : 'RENT_TO_SALE'); }} className="p-2 bg-orange-50 text-orange-600 hover:bg-orange-600 hover:text-white rounded-lg transition-colors" title="Transférer Vente ↔ Location">
-                                <Icons.Transfer />
-                              </button>
-                              <button onClick={() => openEditModal(row.variant)} className="p-2 bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white rounded-lg transition-colors" title="Éditer Prix et Quantité">
-                                <Icons.Edit />
-                              </button>
-                            </>
+                  filteredRows.map((row, idx) => {
+                    const isMissingPrice = !row.variant.purchasePrice || row.variant.purchasePrice <= 0;
+                    const rowClass = (currentUserRole === 'SUPER_ADMIN' && isMissingPrice) 
+                      ? 'bg-red-50/50 hover:bg-red-50 transition-colors border-l-2 border-red-400' 
+                      : 'hover:bg-slate-50 transition-colors';
+
+                    return (
+                      <tr key={`${row.variant.id}-${row.stockType}-${idx}`} className={rowClass}>
+                        <td className="p-4">
+                          {row.variant.imagePath ? (
+                            <img src={row.variant.imagePath.startsWith('http') ? row.variant.imagePath : `file://${row.variant.imagePath}`} alt="Produit" className="w-10 h-10 rounded object-cover border border-slate-200" />
+                          ) : (
+                            <div className="w-10 h-10 bg-slate-100 border border-slate-200 rounded flex items-center justify-center text-xs text-slate-400">N/A</div>
                           )}
-                        </div>
-                      </td>
-                    </tr>
-                  ))
+                        </td>
+                        <td className="p-4">
+                          <p className="font-bold text-slate-700">{row.product.name}</p>
+                          <p className="text-xs text-slate-400 font-mono">Base: {row.items.length > 0 ? row.items[0].barcode.substring(0, row.items[0].barcode.lastIndexOf('-')) : 'N/A'}</p>
+                        </td>
+                        <td className="p-4">
+                          <span className="font-bold text-slate-700">{row.variant.color}</span>
+                          <span className="text-slate-400 text-xs ml-2">({row.variant.size})</span>
+                        </td>
+                        <td className="p-4 text-center">
+                          <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${row.stockType === 'SALE' ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-100 text-blue-700'}`}>
+                            {row.stockType === 'SALE' ? 'Vente' : 'Location'}
+                          </span>
+                        </td>
+                        <td className="p-4 font-black text-slate-800 text-base text-center">{row.items.length}</td>
+                        
+                        <td className="p-4 text-center text-[10px] font-bold text-slate-500">
+                          {/* 🔴 AFFICHAGE DU PRIX D'ACHAT (UNIQUEMENT POUR ADMIN) */}
+                          {currentUserRole === 'SUPER_ADMIN' && (
+                            isMissingPrice ? (
+                              <div className="text-red-600 mb-1 flex items-center justify-center gap-1 font-black"><Icons.Alert /> Achat ?</div>
+                            ) : (
+                              <div className="text-slate-400 mb-1">A: {row.variant.purchasePrice} DH</div>
+                            )
+                          )}
+                          
+                          {/* 🔴 PRIX DE VENTE ET LOCATION (VISIBLES POUR TOUS) */}
+                          {row.variant.salePrice ? <div>V: {row.variant.salePrice} DH</div> : null}
+                          {row.variant.rentPrice ? <div>L: {row.variant.rentPrice} DH</div> : null}
+                        </td>
+                        
+                        <td className="p-4 text-center">
+                          <div className="flex items-center justify-center gap-2">
+                            <button onClick={() => handlePrint(row.product, row.variant, row.items)} className="p-2 bg-slate-100 text-slate-600 hover:bg-slate-800 hover:text-white rounded-lg transition-colors" title={`Imprimer codes ${row.stockType === 'SALE' ? 'Vente' : 'Location'}`}>
+                              <Icons.Print />
+                            </button>
+                            
+                            {currentUserRole === 'SUPER_ADMIN' && (
+                              <>
+                                <button onClick={() => { setTransferVariant(row.variant); setTransferQty(1); setTransferDirection(row.stockType === 'SALE' ? 'SALE_TO_RENT' : 'RENT_TO_SALE'); }} className="p-2 bg-orange-50 text-orange-600 hover:bg-orange-600 hover:text-white rounded-lg transition-colors" title="Transférer Vente ↔ Location">
+                                  <Icons.Transfer />
+                                </button>
+                                <button onClick={() => openEditModal(row.variant)} className={`p-2 rounded-lg transition-colors ${isMissingPrice ? 'bg-red-100 text-red-600 hover:bg-red-600 hover:text-white animate-pulse' : 'bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white'}`} title="Éditer Prix et Quantité">
+                                  <Icons.Edit />
+                                </button>
+                              </>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    )
+                  })
                 )}
               </tbody>
             </table>

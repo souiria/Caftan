@@ -168,11 +168,15 @@ exports.Prisma.SaleScalarFieldEnum = {
   id: 'id',
   ticketNumber: 'ticketNumber',
   totalAmount: 'totalAmount',
+  discountPercent: 'discountPercent',
   discountAmount: 'discountAmount',
   finalAmount: 'finalAmount',
+  advanceAmount: 'advanceAmount',
+  remainingAmount: 'remainingAmount',
   paymentMethod: 'paymentMethod',
   status: 'status',
   userId: 'userId',
+  customerId: 'customerId',
   createdAt: 'createdAt'
 };
 
@@ -187,7 +191,9 @@ exports.Prisma.CustomerScalarFieldEnum = {
   id: 'id',
   cin: 'cin',
   fullName: 'fullName',
-  phone: 'phone'
+  phone: 'phone',
+  email: 'email',
+  city: 'city'
 };
 
 exports.Prisma.ReservationScalarFieldEnum = {
@@ -222,6 +228,16 @@ exports.Prisma.AuditLogScalarFieldEnum = {
   timestamp: 'timestamp'
 };
 
+exports.Prisma.CategoryScalarFieldEnum = {
+  id: 'id',
+  name: 'name'
+};
+
+exports.Prisma.FabricScalarFieldEnum = {
+  id: 'id',
+  name: 'name'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -244,7 +260,9 @@ exports.Prisma.ModelName = {
   Customer: 'Customer',
   Reservation: 'Reservation',
   ReservationItem: 'ReservationItem',
-  AuditLog: 'AuditLog'
+  AuditLog: 'AuditLog',
+  Category: 'Category',
+  Fabric: 'Fabric'
 };
 
 /**

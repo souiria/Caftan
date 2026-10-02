@@ -28,11 +28,10 @@ model User {
 // 2. CATALOGUE (Produits abstraits)
 // ==========================================
 model Product {
-  id          String   @id @default(uuid())
-  name        String   // ex: "Takchita"
-  type        String   // ex: "Mlifa"
+id          String   @id @default(uuid())
+  name        String
+  type        String
   description String?
-
   variants    ProductVariant[]
 }
 
@@ -85,21 +84,29 @@ model StockMovement {
 // 4. VENTES
 // ==========================================
 model Sale {
-  id            String     @id @default(uuid())
-  ticketNumber  String     @unique
-  totalAmount   Float
+  id             String    @id @default(uuid())
+  ticketNumber   String    @unique
+  totalAmount    Float
+  discountPercent Float    @default(0) // NOUVEAU: Remise en %
   discountAmount Float     @default(0)
-  finalAmount   Float
-  paymentMethod String     // "CASH", "CARD"
-  status        String     @default("COMPLETED")
+  finalAmount    Float     // total - discount
   
-  userId        String
-  user          User       @relation(fields: [userId], references: [id])
-  createdAt     DateTime   @default(now())
+  advanceAmount  Float     @default(0) // NOUVEAU: Montant payé en avance
+  remainingAmount Float    @default(0) // NOUVEAU: Reste à payer à la livraison
+  
+  paymentMethod  String    // "CASH" (Espèces), "TPE" (Carte), "ON_DELIVERY" (À la livraison)
+  status         String    @default("COMPLETED") // "COMPLETED", "PENDING_DELIVERY", "CANCELLED"
+  
+  userId         String
+  user           User      @relation(fields: [userId], references: [id])
+  
+  customerId     String?   // NOUVEAU: Client optionnel
+  customer       Customer? @relation(fields: [customerId], references: [id])
+  
+  createdAt      DateTime  @default(now())
 
-  items         SaleItem[]
+  items          SaleItem[]
 }
-
 model SaleItem {
   id           String    @id @default(uuid())
   saleId       String
@@ -115,10 +122,14 @@ model SaleItem {
 // 5. LOCATIONS & RÉSERVATIONS
 // ==========================================
 model Customer {
-  id       String        @id @default(uuid())
-  cin      String        @unique // <--- Ajout de la CIN unique
-  fullName String
-  phone    String?
+  id        String   @id @default(uuid())
+  cin       String?  @unique
+  fullName  String
+  phone     String?
+  email     String?
+  city      String?
+  
+  sales        Sale[]
   reservations Reservation[]
 }
 
@@ -169,4 +180,16 @@ model AuditLog {
   entityId   String
   details    String   
   timestamp  DateTime @default(now())
+}
+// ==========================================
+// PARAMÈTRES (CATÉGORIES & TISSUS)
+// ==========================================
+model Category {
+  id   String @id @default(uuid())
+  name String @unique
+}
+
+model Fabric {
+  id   String @id @default(uuid())
+  name String @unique
 }
