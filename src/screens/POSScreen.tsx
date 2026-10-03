@@ -14,9 +14,11 @@ export default function POSScreen() {
 
   const [barcode, setBarcode] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-
-  // Liste des clients existants
   const [customersList, setCustomersList] = useState<any[]>([])
+  
+  // 🔴 NOUVEAU : État pour le ticket de caisse et les infos de la boutique
+  const [companyInfo, setCompanyInfo] = useState<any>({})
+  const [receiptData, setReceiptData] = useState<any>(null)
 
   const [cart, setCart] = useState<CartItem[]>(() => {
     const savedCart = sessionStorage.getItem('pos_cart')
@@ -27,29 +29,29 @@ export default function POSScreen() {
     sessionStorage.setItem('pos_cart', JSON.stringify(cart)) 
   }, [cart])
 
-  // Charger la liste des clients au démarrage
+  // Charger les clients ET les infos de la boutique au démarrage
   useEffect(() => {
-    const fetchCustomers = async () => {
+    const fetchData = async () => {
       try {
         if ((window as any).api.getCustomers) {
-          const data = await (window as any).api.getCustomers()
-          setCustomersList(data)
+          const custData = await (window as any).api.getCustomers()
+          setCustomersList(custData)
         }
-      } catch (error) { console.error("Erreur clients", error) }
+        if ((window as any).api.getCompany) {
+          const compData = await (window as any).api.getCompany()
+          setCompanyInfo(compData || { name: 'MA BOUTIQUE' })
+        }
+      } catch (error) { console.error("Erreur", error) }
     }
-    fetchCustomers()
+    fetchData()
   }, [])
 
-  // États de Paiement
   const [paymentMethod, setPaymentMethod] = useState<'CASH' | 'TPE' | 'ON_DELIVERY'>('CASH')
   const [discountPercent, setDiscountPercent] = useState<number>(0)
   const [advanceAmount, setAdvanceAmount] = useState<number | ''>('')
-
-  // États du Client (id ajouté pour savoir si c'est un client existant)
   const [customer, setCustomer] = useState({ id: '', fullName: '', phone: '', email: '', city: '' })
   const [showCustomerForm, setShowCustomerForm] = useState(false)
 
-  // Recherche Manuelle
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [availableItems, setAvailableItems] = useState<any[]>([])
@@ -89,7 +91,6 @@ export default function POSScreen() {
     } catch (error) { toast.error("Impossible de charger le stock.") }
   }
 
-  // Calculs Financiers
   const subTotal = cart.reduce((sum, item) => sum + item.price, 0)
   const discountAmount = subTotal * (discountPercent / 100)
   const finalTotal = subTotal - discountAmount
@@ -103,7 +104,7 @@ export default function POSScreen() {
 
     setIsLoading(true)
     try {
-      await (window as any).api.createSale({
+      const sale = await (window as any).api.createSale({
         items: cart.map(c => ({ barcode: c.barcode, price: c.price, stockType: c.transactionType === 'Vente' ? 'SALE' : 'RENT' })),
         totalAmount: subTotal,
         discountPercent: discountPercent,
@@ -113,17 +114,39 @@ export default function POSScreen() {
         userId: currentUser.id
       })
 
+      // 🔴 PRÉPARATION DU TICKET DE CAISSE
+      setReceiptData({
+        ticketNumber: sale.ticketNumber,
+        date: new Date(),
+        items: [...cart],
+        subTotal,
+        discountAmount,
+        finalTotal,
+        paymentMethod,
+        advanceAmount: advanceAmount || finalTotal,
+        remainingToPay,
+        customerName: customer.fullName,
+        cashier: currentUser.username
+      })
+
       toast.success("Encaissé avec succès !")
+      
+      // Réinitialisation de l'écran (derrière le ticket)
       setCart([])
       setCustomer({ id: '', fullName: '', phone: '', email: '', city: '' })
       setDiscountPercent(0); setAdvanceAmount(''); setPaymentMethod('CASH')
       sessionStorage.removeItem('pos_cart') 
       
-      // Rafraichir la liste des clients discrètement (si un nouveau a été ajouté)
       if ((window as any).api.getCustomers) {
-        const updatedCustomers = await (window as any).api.getCustomers()
-        setCustomersList(updatedCustomers)
+        setCustomersList(await (window as any).api.getCustomers())
       }
+
+      // 🔴 DÉCLENCHEMENT DE L'IMPRESSION (Laisse une demi-seconde à React pour afficher le ticket caché)
+      setTimeout(() => {
+        window.print()
+        setReceiptData(null) // Ferme le ticket une fois imprimé
+      }, 500)
+
     } catch (error: any) { toast.error("Erreur lors de l'encaissement : " + error.message) } 
     finally { setIsLoading(false) }
   }
@@ -134,9 +157,110 @@ export default function POSScreen() {
 
   return (
     <>
+      {/* ========================================================
+          TICKET DE CAISSE THERMIQUE (Caché sur l'écran, visible à l'impression)
+      ======================================================== */}
+      {receiptData && (
+        <div className="hidden print:block absolute inset-0 bg-white z-[99999] text-black">
+          <style>{`
+            @media print { 
+              @page { size: 80mm auto; margin: 0; } 
+              body, html { background: white !important; padding: 0; margin: 0; }
+              * { color: black !important; font-family: monospace; }
+            }
+          `}</style>
+          
+          <div className="w-[72mm] mx-auto pt-4 pb-10 text-sm">
+            {/* EN TÊTE */}
+            <div className="text-center mb-4">
+              <h1 className="text-xl font-black uppercase mb-1">{companyInfo.name || 'CAFTAN STORE'}</h1>
+              {companyInfo.address && <p className="text-xs">{companyInfo.address}</p>}
+              {companyInfo.phone && <p className="text-xs">Tél: {companyInfo.phone}</p>}
+              {companyInfo.ice && <p className="text-[10px] mt-1">ICE: {companyInfo.ice}</p>}
+            </div>
+
+            <div className="border-b border-dashed border-black mb-4"></div>
+
+            {/* INFOS TICKET */}
+            <div className="text-xs mb-4">
+              <p>Ticket N° : {receiptData.ticketNumber}</p>
+              <p>Date : {receiptData.date.toLocaleDateString('fr-FR')} à {receiptData.date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute:'2-digit' })}</p>
+              <p>Caissier : {receiptData.cashier}</p>
+              {receiptData.customerName && <p>Client : {receiptData.customerName}</p>}
+            </div>
+
+            <div className="border-b border-dashed border-black mb-4"></div>
+
+            {/* ARTICLES */}
+            <table className="w-full text-xs mb-4">
+              <thead>
+                <tr className="border-b border-black">
+                  <th className="text-left pb-1">Article</th>
+                  <th className="text-right pb-1">Prix</th>
+                </tr>
+              </thead>
+              <tbody>
+                {receiptData.items.map((item: any, i: number) => (
+                  <tr key={i}>
+                    <td className="py-1">
+                      {item.name}
+                      <br/>
+                      <span className="text-[10px]">{item.barcode}</span>
+                    </td>
+                    <td className="text-right align-top py-1 font-bold">{item.price}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            <div className="border-b border-dashed border-black mb-2"></div>
+
+            {/* TOTAUX */}
+            <div className="text-sm space-y-1 mb-4">
+              <div className="flex justify-between">
+                <span>Sous-total:</span>
+                <span>{receiptData.subTotal} DH</span>
+              </div>
+              {receiptData.discountAmount > 0 && (
+                <div className="flex justify-between">
+                  <span>Remise:</span>
+                  <span>- {receiptData.discountAmount} DH</span>
+                </div>
+              )}
+              <div className="flex justify-between text-base font-black mt-2">
+                <span>TOTAL A PAYER:</span>
+                <span>{receiptData.finalTotal} DH</span>
+              </div>
+
+              {/* LIVRAISON (Si applicable) */}
+              {receiptData.paymentMethod === 'ON_DELIVERY' && (
+                <div className="mt-4 pt-2 border-t border-black text-xs">
+                  <div className="flex justify-between font-bold">
+                    <span>Avance payée:</span>
+                    <span>{receiptData.advanceAmount} DH</span>
+                  </div>
+                  <div className="flex justify-between font-black text-sm mt-1">
+                    <span>RESTE A LA LIVRAISON:</span>
+                    <span>{receiptData.remainingToPay} DH</span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="border-b border-dashed border-black mb-4"></div>
+
+            {/* MESSAGE FIN */}
+            <div className="text-center text-xs space-y-2">
+              <p>{companyInfo.message || 'Merci de votre visite et à très bientôt !'}</p>
+              <p>----------------------</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* MODAL RECHERCHE */}
       {isSearchModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 print:hidden">
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-3xl h-[80vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
             <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-indigo-50">
               <h3 className="font-black text-indigo-800 text-lg">Recherche Manuelle d'Article</h3>
@@ -166,8 +290,8 @@ export default function POSScreen() {
         </div>
       )}
 
-      {/* INTERFACE PRINCIPALE */}
-      <div className="max-w-[1400px] mx-auto h-[85vh] flex gap-6 animate-in fade-in duration-500">
+      {/* INTERFACE PRINCIPALE (Masquée pendant l'impression) */}
+      <div className="max-w-[1400px] mx-auto h-[85vh] flex gap-6 animate-in fade-in duration-500 print:hidden">
 
         {/* GAUCHE : Panier */}
         <div className="flex-1 bg-white rounded-2xl shadow-sm border border-slate-100 flex flex-col overflow-hidden">
@@ -205,7 +329,6 @@ export default function POSScreen() {
         {/* DROITE : Scanner, Client et Paiement */}
         <div className="w-[450px] flex flex-col gap-4 overflow-y-auto pr-2 pb-10">
           
-          {/* Scanner */}
           <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 shrink-0">
             <h3 className="text-sm font-bold text-slate-500 uppercase mb-3 flex justify-between items-center">
               Scanner <button onClick={openSearchModal} className="text-indigo-600 bg-indigo-50 px-2 py-1 rounded text-[10px]">Manuelle</button>
@@ -216,7 +339,6 @@ export default function POSScreen() {
             </form>
           </div>
 
-          {/* Fiche Client avec Sélection Intelligente */}
           <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 shrink-0">
             <div className="flex justify-between items-center mb-3">
               <h3 className="text-sm font-bold text-slate-500 uppercase flex items-center"><Icons.User /> Fiche Client</h3>
@@ -227,8 +349,6 @@ export default function POSScreen() {
             
             {showCustomerForm && (
               <div className="grid grid-cols-2 gap-3 mt-4 animate-in slide-in-from-top-2">
-                
-                {/* Sélection depuis la base de données */}
                 <div className="col-span-2">
                   <select 
                     className="w-full p-2.5 text-sm rounded-lg border border-slate-200 outline-none focus:border-indigo-500 bg-indigo-50/50 font-bold text-indigo-700"
@@ -261,10 +381,7 @@ export default function POSScreen() {
             )}
           </div>
 
-          {/* Résumé et Encaisser */}
           <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 shrink-0">
-            
-            {/* Méthode de paiement */}
             <div className="flex gap-2 mb-6 p-1 bg-slate-100 rounded-xl">
               <button onClick={() => setPaymentMethod('CASH')} className={`flex-1 py-2 text-xs font-bold rounded-lg ${paymentMethod === 'CASH' ? 'bg-white shadow text-slate-800' : 'text-slate-500'}`}>Espèces</button>
               <button onClick={() => setPaymentMethod('TPE')} className={`flex-1 py-2 text-xs font-bold rounded-lg ${paymentMethod === 'TPE' ? 'bg-white shadow text-slate-800' : 'text-slate-500'}`}>TPE (Carte)</button>
@@ -297,7 +414,7 @@ export default function POSScreen() {
             </div>
 
             <button onClick={handleCheckout} disabled={cart.length === 0 || isLoading} className={`w-full text-white font-bold py-4 rounded-xl shadow-lg transition-colors text-lg disabled:bg-slate-300 ${paymentMethod === 'ON_DELIVERY' ? 'bg-orange-500 hover:bg-orange-600' : 'bg-emerald-500 hover:bg-emerald-600'}`}>
-              {isLoading ? 'Traitement...' : (paymentMethod === 'ON_DELIVERY' ? 'Valider la commande' : 'Encaisser')}
+              {isLoading ? 'Impression en cours...' : (paymentMethod === 'ON_DELIVERY' ? 'Valider et Imprimer' : 'Encaisser et Imprimer')}
             </button>
           </div>
         </div>

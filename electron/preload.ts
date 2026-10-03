@@ -61,6 +61,9 @@ try {
     addCustomer: (data: any) => ipcRenderer.invoke('add-customer', data),
     updateCustomer: (data: any) => ipcRenderer.invoke('update-customer', data),
     deleteCustomer: (id: string) => ipcRenderer.invoke('delete-customer', id),
+
+    getCompany: () => ipcRenderer.invoke('get-company'),
+    updateCompany: (data: any) => ipcRenderer.invoke('update-company', data),
   })
   
   console.log('✅ window.api EXPOSED SUCCESSFULLY')

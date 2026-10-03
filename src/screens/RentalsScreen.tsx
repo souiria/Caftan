@@ -8,6 +8,11 @@ const Icons = {
   Calendar: () => <svg className="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
 }
 
+// Fonction pour obtenir la date locale au bon format (YYYY-MM-DD)
+const getLocalDateString = (date: Date) => {
+  return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().split('T')[0]
+}
+
 export default function RentalsScreen() {
   const [rentals, setRentals] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(false)
@@ -63,13 +68,13 @@ export default function RentalsScreen() {
     setIsBookingModalOpen(true)
     resetBookingForm()
     
-    // Initialise avec Aujourd'hui et Demain
+    // Initialise avec Aujourd'hui et Demain (En heure locale pour éviter les décalages)
     const today = new Date()
-    const tomorrow = new Date()
-    tomorrow.setDate(today.getDate() + 1)
+    const tomorrow = new Date(today)
+    tomorrow.setDate(tomorrow.getDate() + 1)
     
-    const startStr = today.toISOString().split('T')[0]
-    const endStr = tomorrow.toISOString().split('T')[0]
+    const startStr = getLocalDateString(today)
+    const endStr = getLocalDateString(tomorrow)
     
     setStartDate(startStr)
     setEndDate(endStr)
@@ -112,8 +117,13 @@ export default function RentalsScreen() {
     setIsLoading(true)
     try {
       await (window as any).api.createRental({
-        cin, fullName, startDate, endDate, 
-        totalAmount: Number(totalPrice), advanceAmount: Number(advanceAmount), stockItemId: scannedItem.id
+        cin: cin.trim().toUpperCase(), // On passe en majuscule au moment de l'enregistrement uniquement
+        fullName: fullName.trim(), 
+        startDate, 
+        endDate, 
+        totalAmount: Number(totalPrice), 
+        advanceAmount: Number(advanceAmount), 
+        stockItemId: scannedItem.id
       })
       alert("Location enregistrée avec succès !")
       setIsBookingModalOpen(false)
@@ -144,7 +154,8 @@ export default function RentalsScreen() {
 
   const handleReturnItem = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (confirmCin.toUpperCase() !== selectedRental.customer.cin.toUpperCase()) {
+    // Comparaison insensible à la casse
+    if (confirmCin.trim().toUpperCase() !== selectedRental.customer.cin.toUpperCase()) {
       return alert("ERREUR : La CIN saisie ne correspond pas à celle du client !")
     }
 
@@ -274,8 +285,15 @@ export default function RentalsScreen() {
                         <div>
                           <h4 className="font-black text-slate-800 border-b border-slate-100 pb-2 mb-4">3. Informations Client</h4>
                           <div className="grid grid-cols-2 gap-4">
-                            <div><label className="text-xs font-bold text-slate-500 uppercase">CIN Client</label><input type="text" required value={cin} onChange={e => setCin(e.target.value.toUpperCase())} className="w-full p-2.5 rounded-lg border border-slate-300 mt-1 font-mono uppercase" placeholder="Ex: AB123456" /></div>
-                            <div><label className="text-xs font-bold text-slate-500 uppercase">Nom Complet</label><input type="text" required value={fullName} onChange={e => setFullName(e.target.value)} className="w-full p-2.5 rounded-lg border border-slate-300 mt-1" /></div>
+                            <div>
+                              <label className="text-xs font-bold text-slate-500 uppercase">CIN Client</label>
+                              {/* 🔴 CORRECTION DU BUG ICI : Plus de .toUpperCase() dans le onChange */}
+                              <input type="text" required autoFocus value={cin} onChange={e => setCin(e.target.value)} className="w-full p-2.5 rounded-lg border border-slate-300 mt-1 font-mono uppercase" placeholder="Ex: AB123456" />
+                            </div>
+                            <div>
+                              <label className="text-xs font-bold text-slate-500 uppercase">Nom Complet</label>
+                              <input type="text" required value={fullName} onChange={e => setFullName(e.target.value)} className="w-full p-2.5 rounded-lg border border-slate-300 mt-1" />
+                            </div>
                           </div>
                         </div>
 
@@ -316,7 +334,8 @@ export default function RentalsScreen() {
                 </div>
                 <div>
                   <label className="text-xs font-bold text-slate-500 uppercase">Vérification de sécurité</label>
-                  <input type="text" required value={confirmCin} onChange={e => setConfirmCin(e.target.value)} placeholder="Saisir la CIN du client" className="w-full p-3 rounded-xl border border-slate-300 mt-1 font-mono text-center tracking-widest text-lg focus:border-slate-800 uppercase" />
+                  {/* 🔴 CORRECTION DU BUG ICI : Plus de .toUpperCase() dans le onChange */}
+                  <input type="text" required autoFocus value={confirmCin} onChange={e => setConfirmCin(e.target.value)} placeholder="Saisir la CIN du client" className="w-full p-3 rounded-xl border border-slate-300 mt-1 font-mono text-center tracking-widest text-lg focus:border-slate-800 uppercase" />
                   <p className="text-xs text-slate-400 text-center mt-2">La CIN doit correspondre à <b>{selectedRental.customer.cin}</b></p>
                 </div>
                 <div className="border-t border-slate-100 pt-4 space-y-3">

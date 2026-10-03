@@ -238,6 +238,16 @@ exports.Prisma.FabricScalarFieldEnum = {
   name: 'name'
 };
 
+exports.Prisma.CompanySettingsScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  address: 'address',
+  phone: 'phone',
+  email: 'email',
+  ice: 'ice',
+  message: 'message'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -262,7 +272,8 @@ exports.Prisma.ModelName = {
   ReservationItem: 'ReservationItem',
   AuditLog: 'AuditLog',
   Category: 'Category',
-  Fabric: 'Fabric'
+  Fabric: 'Fabric',
+  CompanySettings: 'CompanySettings'
 };
 
 /**

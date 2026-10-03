@@ -343,6 +343,23 @@ function setupDatabaseIPC() {
   ipcMain.handle('delete-customer', async (_, id) => await prisma.customer.delete({ where: { id } }))
 
 } // FIN DE setupDatabaseIPC() ✅ (C'est ici que l'accolade devait être)
+// =========================================================
+  // GESTION DU PROFIL DE L'ENTREPRISE
+  // =========================================================
+  ipcMain.handle('get-company', async () => {
+    let company = await prisma.companySettings.findUnique({ where: { id: "1" } })
+    if (!company) {
+      company = await prisma.companySettings.create({ data: { id: "1", name: "Ma Boutique", message: "Merci de votre visite !" } })
+    }
+    return company
+  })
 
+  ipcMain.handle('update-company', async (_, data) => {
+    return await prisma.companySettings.upsert({
+      where: { id: "1" },
+      update: data,
+      create: { id: "1", ...data }
+    })
+  })
 app.on('window-all-closed', () => { if (process.platform !== 'darwin') app.quit() })
 app.whenReady().then(() => { setupDatabaseIPC(); createWindow() })

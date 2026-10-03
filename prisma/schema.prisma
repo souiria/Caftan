@@ -193,3 +193,15 @@ model Fabric {
   id   String @id @default(uuid())
   name String @unique
 }
+// ==========================================
+// PARAMÈTRES DE L'ENTREPRISE (TICKET CAISSE)
+// ==========================================
+model CompanySettings {
+  id      String  @id @default("1")
+  name    String
+  address String?
+  phone   String?
+  email   String?
+  ice     String?
+  message String?
+}

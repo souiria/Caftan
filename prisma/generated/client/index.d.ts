@@ -78,6 +78,11 @@ export type Category = $Result.DefaultSelection<Prisma.$CategoryPayload>
  * 
  */
 export type Fabric = $Result.DefaultSelection<Prisma.$FabricPayload>
+/**
+ * Model CompanySettings
+ * 
+ */
+export type CompanySettings = $Result.DefaultSelection<Prisma.$CompanySettingsPayload>
 
 /**
  * ##  Prisma Client ʲˢ
@@ -331,6 +336,16 @@ export class PrismaClient<
     * ```
     */
   get fabric(): Prisma.FabricDelegate<ExtArgs>;
+
+  /**
+   * `prisma.companySettings`: Exposes CRUD operations for the **CompanySettings** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more CompanySettings
+    * const companySettings = await prisma.companySettings.findMany()
+    * ```
+    */
+  get companySettings(): Prisma.CompanySettingsDelegate<ExtArgs>;
 }
 
 export namespace Prisma {
@@ -784,7 +799,8 @@ export namespace Prisma {
     ReservationItem: 'ReservationItem',
     AuditLog: 'AuditLog',
     Category: 'Category',
-    Fabric: 'Fabric'
+    Fabric: 'Fabric',
+    CompanySettings: 'CompanySettings'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -800,7 +816,7 @@ export namespace Prisma {
 
   export type TypeMap<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> = {
     meta: {
-      modelProps: "user" | "product" | "productVariant" | "stockItem" | "stockMovement" | "sale" | "saleItem" | "customer" | "reservation" | "reservationItem" | "auditLog" | "category" | "fabric"
+      modelProps: "user" | "product" | "productVariant" | "stockItem" | "stockMovement" | "sale" | "saleItem" | "customer" | "reservation" | "reservationItem" | "auditLog" | "category" | "fabric" | "companySettings"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1711,6 +1727,76 @@ export namespace Prisma {
           count: {
             args: Prisma.FabricCountArgs<ExtArgs>
             result: $Utils.Optional<FabricCountAggregateOutputType> | number
+          }
+        }
+      }
+      CompanySettings: {
+        payload: Prisma.$CompanySettingsPayload<ExtArgs>
+        fields: Prisma.CompanySettingsFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.CompanySettingsFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CompanySettingsPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.CompanySettingsFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CompanySettingsPayload>
+          }
+          findFirst: {
+            args: Prisma.CompanySettingsFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CompanySettingsPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.CompanySettingsFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CompanySettingsPayload>
+          }
+          findMany: {
+            args: Prisma.CompanySettingsFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CompanySettingsPayload>[]
+          }
+          create: {
+            args: Prisma.CompanySettingsCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CompanySettingsPayload>
+          }
+          createMany: {
+            args: Prisma.CompanySettingsCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.CompanySettingsCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CompanySettingsPayload>[]
+          }
+          delete: {
+            args: Prisma.CompanySettingsDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CompanySettingsPayload>
+          }
+          update: {
+            args: Prisma.CompanySettingsUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CompanySettingsPayload>
+          }
+          deleteMany: {
+            args: Prisma.CompanySettingsDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.CompanySettingsUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.CompanySettingsUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CompanySettingsPayload>
+          }
+          aggregate: {
+            args: Prisma.CompanySettingsAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateCompanySettings>
+          }
+          groupBy: {
+            args: Prisma.CompanySettingsGroupByArgs<ExtArgs>
+            result: $Utils.Optional<CompanySettingsGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.CompanySettingsCountArgs<ExtArgs>
+            result: $Utils.Optional<CompanySettingsCountAggregateOutputType> | number
           }
         }
       }
@@ -14824,6 +14910,906 @@ export namespace Prisma {
 
 
   /**
+   * Model CompanySettings
+   */
+
+  export type AggregateCompanySettings = {
+    _count: CompanySettingsCountAggregateOutputType | null
+    _min: CompanySettingsMinAggregateOutputType | null
+    _max: CompanySettingsMaxAggregateOutputType | null
+  }
+
+  export type CompanySettingsMinAggregateOutputType = {
+    id: string | null
+    name: string | null
+    address: string | null
+    phone: string | null
+    email: string | null
+    ice: string | null
+    message: string | null
+  }
+
+  export type CompanySettingsMaxAggregateOutputType = {
+    id: string | null
+    name: string | null
+    address: string | null
+    phone: string | null
+    email: string | null
+    ice: string | null
+    message: string | null
+  }
+
+  export type CompanySettingsCountAggregateOutputType = {
+    id: number
+    name: number
+    address: number
+    phone: number
+    email: number
+    ice: number
+    message: number
+    _all: number
+  }
+
+
+  export type CompanySettingsMinAggregateInputType = {
+    id?: true
+    name?: true
+    address?: true
+    phone?: true
+    email?: true
+    ice?: true
+    message?: true
+  }
+
+  export type CompanySettingsMaxAggregateInputType = {
+    id?: true
+    name?: true
+    address?: true
+    phone?: true
+    email?: true
+    ice?: true
+    message?: true
+  }
+
+  export type CompanySettingsCountAggregateInputType = {
+    id?: true
+    name?: true
+    address?: true
+    phone?: true
+    email?: true
+    ice?: true
+    message?: true
+    _all?: true
+  }
+
+  export type CompanySettingsAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which CompanySettings to aggregate.
+     */
+    where?: CompanySettingsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CompanySettings to fetch.
+     */
+    orderBy?: CompanySettingsOrderByWithRelationInput | CompanySettingsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: CompanySettingsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CompanySettings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CompanySettings.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned CompanySettings
+    **/
+    _count?: true | CompanySettingsCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: CompanySettingsMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: CompanySettingsMaxAggregateInputType
+  }
+
+  export type GetCompanySettingsAggregateType<T extends CompanySettingsAggregateArgs> = {
+        [P in keyof T & keyof AggregateCompanySettings]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateCompanySettings[P]>
+      : GetScalarType<T[P], AggregateCompanySettings[P]>
+  }
+
+
+
+
+  export type CompanySettingsGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: CompanySettingsWhereInput
+    orderBy?: CompanySettingsOrderByWithAggregationInput | CompanySettingsOrderByWithAggregationInput[]
+    by: CompanySettingsScalarFieldEnum[] | CompanySettingsScalarFieldEnum
+    having?: CompanySettingsScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: CompanySettingsCountAggregateInputType | true
+    _min?: CompanySettingsMinAggregateInputType
+    _max?: CompanySettingsMaxAggregateInputType
+  }
+
+  export type CompanySettingsGroupByOutputType = {
+    id: string
+    name: string
+    address: string | null
+    phone: string | null
+    email: string | null
+    ice: string | null
+    message: string | null
+    _count: CompanySettingsCountAggregateOutputType | null
+    _min: CompanySettingsMinAggregateOutputType | null
+    _max: CompanySettingsMaxAggregateOutputType | null
+  }
+
+  type GetCompanySettingsGroupByPayload<T extends CompanySettingsGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<CompanySettingsGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof CompanySettingsGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], CompanySettingsGroupByOutputType[P]>
+            : GetScalarType<T[P], CompanySettingsGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type CompanySettingsSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    address?: boolean
+    phone?: boolean
+    email?: boolean
+    ice?: boolean
+    message?: boolean
+  }, ExtArgs["result"]["companySettings"]>
+
+  export type CompanySettingsSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    address?: boolean
+    phone?: boolean
+    email?: boolean
+    ice?: boolean
+    message?: boolean
+  }, ExtArgs["result"]["companySettings"]>
+
+  export type CompanySettingsSelectScalar = {
+    id?: boolean
+    name?: boolean
+    address?: boolean
+    phone?: boolean
+    email?: boolean
+    ice?: boolean
+    message?: boolean
+  }
+
+
+  export type $CompanySettingsPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "CompanySettings"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      name: string
+      address: string | null
+      phone: string | null
+      email: string | null
+      ice: string | null
+      message: string | null
+    }, ExtArgs["result"]["companySettings"]>
+    composites: {}
+  }
+
+  type CompanySettingsGetPayload<S extends boolean | null | undefined | CompanySettingsDefaultArgs> = $Result.GetResult<Prisma.$CompanySettingsPayload, S>
+
+  type CompanySettingsCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<CompanySettingsFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: CompanySettingsCountAggregateInputType | true
+    }
+
+  export interface CompanySettingsDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['CompanySettings'], meta: { name: 'CompanySettings' } }
+    /**
+     * Find zero or one CompanySettings that matches the filter.
+     * @param {CompanySettingsFindUniqueArgs} args - Arguments to find a CompanySettings
+     * @example
+     * // Get one CompanySettings
+     * const companySettings = await prisma.companySettings.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends CompanySettingsFindUniqueArgs>(args: SelectSubset<T, CompanySettingsFindUniqueArgs<ExtArgs>>): Prisma__CompanySettingsClient<$Result.GetResult<Prisma.$CompanySettingsPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one CompanySettings that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {CompanySettingsFindUniqueOrThrowArgs} args - Arguments to find a CompanySettings
+     * @example
+     * // Get one CompanySettings
+     * const companySettings = await prisma.companySettings.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends CompanySettingsFindUniqueOrThrowArgs>(args: SelectSubset<T, CompanySettingsFindUniqueOrThrowArgs<ExtArgs>>): Prisma__CompanySettingsClient<$Result.GetResult<Prisma.$CompanySettingsPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first CompanySettings that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CompanySettingsFindFirstArgs} args - Arguments to find a CompanySettings
+     * @example
+     * // Get one CompanySettings
+     * const companySettings = await prisma.companySettings.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends CompanySettingsFindFirstArgs>(args?: SelectSubset<T, CompanySettingsFindFirstArgs<ExtArgs>>): Prisma__CompanySettingsClient<$Result.GetResult<Prisma.$CompanySettingsPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first CompanySettings that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CompanySettingsFindFirstOrThrowArgs} args - Arguments to find a CompanySettings
+     * @example
+     * // Get one CompanySettings
+     * const companySettings = await prisma.companySettings.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends CompanySettingsFindFirstOrThrowArgs>(args?: SelectSubset<T, CompanySettingsFindFirstOrThrowArgs<ExtArgs>>): Prisma__CompanySettingsClient<$Result.GetResult<Prisma.$CompanySettingsPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more CompanySettings that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CompanySettingsFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all CompanySettings
+     * const companySettings = await prisma.companySettings.findMany()
+     * 
+     * // Get first 10 CompanySettings
+     * const companySettings = await prisma.companySettings.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const companySettingsWithIdOnly = await prisma.companySettings.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends CompanySettingsFindManyArgs>(args?: SelectSubset<T, CompanySettingsFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CompanySettingsPayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a CompanySettings.
+     * @param {CompanySettingsCreateArgs} args - Arguments to create a CompanySettings.
+     * @example
+     * // Create one CompanySettings
+     * const CompanySettings = await prisma.companySettings.create({
+     *   data: {
+     *     // ... data to create a CompanySettings
+     *   }
+     * })
+     * 
+     */
+    create<T extends CompanySettingsCreateArgs>(args: SelectSubset<T, CompanySettingsCreateArgs<ExtArgs>>): Prisma__CompanySettingsClient<$Result.GetResult<Prisma.$CompanySettingsPayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many CompanySettings.
+     * @param {CompanySettingsCreateManyArgs} args - Arguments to create many CompanySettings.
+     * @example
+     * // Create many CompanySettings
+     * const companySettings = await prisma.companySettings.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends CompanySettingsCreateManyArgs>(args?: SelectSubset<T, CompanySettingsCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many CompanySettings and returns the data saved in the database.
+     * @param {CompanySettingsCreateManyAndReturnArgs} args - Arguments to create many CompanySettings.
+     * @example
+     * // Create many CompanySettings
+     * const companySettings = await prisma.companySettings.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many CompanySettings and only return the `id`
+     * const companySettingsWithIdOnly = await prisma.companySettings.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends CompanySettingsCreateManyAndReturnArgs>(args?: SelectSubset<T, CompanySettingsCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CompanySettingsPayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a CompanySettings.
+     * @param {CompanySettingsDeleteArgs} args - Arguments to delete one CompanySettings.
+     * @example
+     * // Delete one CompanySettings
+     * const CompanySettings = await prisma.companySettings.delete({
+     *   where: {
+     *     // ... filter to delete one CompanySettings
+     *   }
+     * })
+     * 
+     */
+    delete<T extends CompanySettingsDeleteArgs>(args: SelectSubset<T, CompanySettingsDeleteArgs<ExtArgs>>): Prisma__CompanySettingsClient<$Result.GetResult<Prisma.$CompanySettingsPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one CompanySettings.
+     * @param {CompanySettingsUpdateArgs} args - Arguments to update one CompanySettings.
+     * @example
+     * // Update one CompanySettings
+     * const companySettings = await prisma.companySettings.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends CompanySettingsUpdateArgs>(args: SelectSubset<T, CompanySettingsUpdateArgs<ExtArgs>>): Prisma__CompanySettingsClient<$Result.GetResult<Prisma.$CompanySettingsPayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more CompanySettings.
+     * @param {CompanySettingsDeleteManyArgs} args - Arguments to filter CompanySettings to delete.
+     * @example
+     * // Delete a few CompanySettings
+     * const { count } = await prisma.companySettings.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends CompanySettingsDeleteManyArgs>(args?: SelectSubset<T, CompanySettingsDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more CompanySettings.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CompanySettingsUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many CompanySettings
+     * const companySettings = await prisma.companySettings.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends CompanySettingsUpdateManyArgs>(args: SelectSubset<T, CompanySettingsUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one CompanySettings.
+     * @param {CompanySettingsUpsertArgs} args - Arguments to update or create a CompanySettings.
+     * @example
+     * // Update or create a CompanySettings
+     * const companySettings = await prisma.companySettings.upsert({
+     *   create: {
+     *     // ... data to create a CompanySettings
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the CompanySettings we want to update
+     *   }
+     * })
+     */
+    upsert<T extends CompanySettingsUpsertArgs>(args: SelectSubset<T, CompanySettingsUpsertArgs<ExtArgs>>): Prisma__CompanySettingsClient<$Result.GetResult<Prisma.$CompanySettingsPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of CompanySettings.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CompanySettingsCountArgs} args - Arguments to filter CompanySettings to count.
+     * @example
+     * // Count the number of CompanySettings
+     * const count = await prisma.companySettings.count({
+     *   where: {
+     *     // ... the filter for the CompanySettings we want to count
+     *   }
+     * })
+    **/
+    count<T extends CompanySettingsCountArgs>(
+      args?: Subset<T, CompanySettingsCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], CompanySettingsCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a CompanySettings.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CompanySettingsAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends CompanySettingsAggregateArgs>(args: Subset<T, CompanySettingsAggregateArgs>): Prisma.PrismaPromise<GetCompanySettingsAggregateType<T>>
+
+    /**
+     * Group by CompanySettings.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CompanySettingsGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends CompanySettingsGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: CompanySettingsGroupByArgs['orderBy'] }
+        : { orderBy?: CompanySettingsGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, CompanySettingsGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetCompanySettingsGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the CompanySettings model
+   */
+  readonly fields: CompanySettingsFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for CompanySettings.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__CompanySettingsClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the CompanySettings model
+   */ 
+  interface CompanySettingsFieldRefs {
+    readonly id: FieldRef<"CompanySettings", 'String'>
+    readonly name: FieldRef<"CompanySettings", 'String'>
+    readonly address: FieldRef<"CompanySettings", 'String'>
+    readonly phone: FieldRef<"CompanySettings", 'String'>
+    readonly email: FieldRef<"CompanySettings", 'String'>
+    readonly ice: FieldRef<"CompanySettings", 'String'>
+    readonly message: FieldRef<"CompanySettings", 'String'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * CompanySettings findUnique
+   */
+  export type CompanySettingsFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CompanySettings
+     */
+    select?: CompanySettingsSelect<ExtArgs> | null
+    /**
+     * Filter, which CompanySettings to fetch.
+     */
+    where: CompanySettingsWhereUniqueInput
+  }
+
+  /**
+   * CompanySettings findUniqueOrThrow
+   */
+  export type CompanySettingsFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CompanySettings
+     */
+    select?: CompanySettingsSelect<ExtArgs> | null
+    /**
+     * Filter, which CompanySettings to fetch.
+     */
+    where: CompanySettingsWhereUniqueInput
+  }
+
+  /**
+   * CompanySettings findFirst
+   */
+  export type CompanySettingsFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CompanySettings
+     */
+    select?: CompanySettingsSelect<ExtArgs> | null
+    /**
+     * Filter, which CompanySettings to fetch.
+     */
+    where?: CompanySettingsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CompanySettings to fetch.
+     */
+    orderBy?: CompanySettingsOrderByWithRelationInput | CompanySettingsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for CompanySettings.
+     */
+    cursor?: CompanySettingsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CompanySettings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CompanySettings.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of CompanySettings.
+     */
+    distinct?: CompanySettingsScalarFieldEnum | CompanySettingsScalarFieldEnum[]
+  }
+
+  /**
+   * CompanySettings findFirstOrThrow
+   */
+  export type CompanySettingsFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CompanySettings
+     */
+    select?: CompanySettingsSelect<ExtArgs> | null
+    /**
+     * Filter, which CompanySettings to fetch.
+     */
+    where?: CompanySettingsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CompanySettings to fetch.
+     */
+    orderBy?: CompanySettingsOrderByWithRelationInput | CompanySettingsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for CompanySettings.
+     */
+    cursor?: CompanySettingsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CompanySettings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CompanySettings.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of CompanySettings.
+     */
+    distinct?: CompanySettingsScalarFieldEnum | CompanySettingsScalarFieldEnum[]
+  }
+
+  /**
+   * CompanySettings findMany
+   */
+  export type CompanySettingsFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CompanySettings
+     */
+    select?: CompanySettingsSelect<ExtArgs> | null
+    /**
+     * Filter, which CompanySettings to fetch.
+     */
+    where?: CompanySettingsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CompanySettings to fetch.
+     */
+    orderBy?: CompanySettingsOrderByWithRelationInput | CompanySettingsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing CompanySettings.
+     */
+    cursor?: CompanySettingsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CompanySettings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CompanySettings.
+     */
+    skip?: number
+    distinct?: CompanySettingsScalarFieldEnum | CompanySettingsScalarFieldEnum[]
+  }
+
+  /**
+   * CompanySettings create
+   */
+  export type CompanySettingsCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CompanySettings
+     */
+    select?: CompanySettingsSelect<ExtArgs> | null
+    /**
+     * The data needed to create a CompanySettings.
+     */
+    data: XOR<CompanySettingsCreateInput, CompanySettingsUncheckedCreateInput>
+  }
+
+  /**
+   * CompanySettings createMany
+   */
+  export type CompanySettingsCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many CompanySettings.
+     */
+    data: CompanySettingsCreateManyInput | CompanySettingsCreateManyInput[]
+  }
+
+  /**
+   * CompanySettings createManyAndReturn
+   */
+  export type CompanySettingsCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CompanySettings
+     */
+    select?: CompanySettingsSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many CompanySettings.
+     */
+    data: CompanySettingsCreateManyInput | CompanySettingsCreateManyInput[]
+  }
+
+  /**
+   * CompanySettings update
+   */
+  export type CompanySettingsUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CompanySettings
+     */
+    select?: CompanySettingsSelect<ExtArgs> | null
+    /**
+     * The data needed to update a CompanySettings.
+     */
+    data: XOR<CompanySettingsUpdateInput, CompanySettingsUncheckedUpdateInput>
+    /**
+     * Choose, which CompanySettings to update.
+     */
+    where: CompanySettingsWhereUniqueInput
+  }
+
+  /**
+   * CompanySettings updateMany
+   */
+  export type CompanySettingsUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update CompanySettings.
+     */
+    data: XOR<CompanySettingsUpdateManyMutationInput, CompanySettingsUncheckedUpdateManyInput>
+    /**
+     * Filter which CompanySettings to update
+     */
+    where?: CompanySettingsWhereInput
+  }
+
+  /**
+   * CompanySettings upsert
+   */
+  export type CompanySettingsUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CompanySettings
+     */
+    select?: CompanySettingsSelect<ExtArgs> | null
+    /**
+     * The filter to search for the CompanySettings to update in case it exists.
+     */
+    where: CompanySettingsWhereUniqueInput
+    /**
+     * In case the CompanySettings found by the `where` argument doesn't exist, create a new CompanySettings with this data.
+     */
+    create: XOR<CompanySettingsCreateInput, CompanySettingsUncheckedCreateInput>
+    /**
+     * In case the CompanySettings was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<CompanySettingsUpdateInput, CompanySettingsUncheckedUpdateInput>
+  }
+
+  /**
+   * CompanySettings delete
+   */
+  export type CompanySettingsDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CompanySettings
+     */
+    select?: CompanySettingsSelect<ExtArgs> | null
+    /**
+     * Filter which CompanySettings to delete.
+     */
+    where: CompanySettingsWhereUniqueInput
+  }
+
+  /**
+   * CompanySettings deleteMany
+   */
+  export type CompanySettingsDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which CompanySettings to delete
+     */
+    where?: CompanySettingsWhereInput
+  }
+
+  /**
+   * CompanySettings without action
+   */
+  export type CompanySettingsDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CompanySettings
+     */
+    select?: CompanySettingsSelect<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -14990,6 +15976,19 @@ export namespace Prisma {
   };
 
   export type FabricScalarFieldEnum = (typeof FabricScalarFieldEnum)[keyof typeof FabricScalarFieldEnum]
+
+
+  export const CompanySettingsScalarFieldEnum: {
+    id: 'id',
+    name: 'name',
+    address: 'address',
+    phone: 'phone',
+    email: 'email',
+    ice: 'ice',
+    message: 'message'
+  };
+
+  export type CompanySettingsScalarFieldEnum = (typeof CompanySettingsScalarFieldEnum)[keyof typeof CompanySettingsScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -15884,6 +16883,68 @@ export namespace Prisma {
     name?: StringWithAggregatesFilter<"Fabric"> | string
   }
 
+  export type CompanySettingsWhereInput = {
+    AND?: CompanySettingsWhereInput | CompanySettingsWhereInput[]
+    OR?: CompanySettingsWhereInput[]
+    NOT?: CompanySettingsWhereInput | CompanySettingsWhereInput[]
+    id?: StringFilter<"CompanySettings"> | string
+    name?: StringFilter<"CompanySettings"> | string
+    address?: StringNullableFilter<"CompanySettings"> | string | null
+    phone?: StringNullableFilter<"CompanySettings"> | string | null
+    email?: StringNullableFilter<"CompanySettings"> | string | null
+    ice?: StringNullableFilter<"CompanySettings"> | string | null
+    message?: StringNullableFilter<"CompanySettings"> | string | null
+  }
+
+  export type CompanySettingsOrderByWithRelationInput = {
+    id?: SortOrder
+    name?: SortOrder
+    address?: SortOrderInput | SortOrder
+    phone?: SortOrderInput | SortOrder
+    email?: SortOrderInput | SortOrder
+    ice?: SortOrderInput | SortOrder
+    message?: SortOrderInput | SortOrder
+  }
+
+  export type CompanySettingsWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: CompanySettingsWhereInput | CompanySettingsWhereInput[]
+    OR?: CompanySettingsWhereInput[]
+    NOT?: CompanySettingsWhereInput | CompanySettingsWhereInput[]
+    name?: StringFilter<"CompanySettings"> | string
+    address?: StringNullableFilter<"CompanySettings"> | string | null
+    phone?: StringNullableFilter<"CompanySettings"> | string | null
+    email?: StringNullableFilter<"CompanySettings"> | string | null
+    ice?: StringNullableFilter<"CompanySettings"> | string | null
+    message?: StringNullableFilter<"CompanySettings"> | string | null
+  }, "id">
+
+  export type CompanySettingsOrderByWithAggregationInput = {
+    id?: SortOrder
+    name?: SortOrder
+    address?: SortOrderInput | SortOrder
+    phone?: SortOrderInput | SortOrder
+    email?: SortOrderInput | SortOrder
+    ice?: SortOrderInput | SortOrder
+    message?: SortOrderInput | SortOrder
+    _count?: CompanySettingsCountOrderByAggregateInput
+    _max?: CompanySettingsMaxOrderByAggregateInput
+    _min?: CompanySettingsMinOrderByAggregateInput
+  }
+
+  export type CompanySettingsScalarWhereWithAggregatesInput = {
+    AND?: CompanySettingsScalarWhereWithAggregatesInput | CompanySettingsScalarWhereWithAggregatesInput[]
+    OR?: CompanySettingsScalarWhereWithAggregatesInput[]
+    NOT?: CompanySettingsScalarWhereWithAggregatesInput | CompanySettingsScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"CompanySettings"> | string
+    name?: StringWithAggregatesFilter<"CompanySettings"> | string
+    address?: StringNullableWithAggregatesFilter<"CompanySettings"> | string | null
+    phone?: StringNullableWithAggregatesFilter<"CompanySettings"> | string | null
+    email?: StringNullableWithAggregatesFilter<"CompanySettings"> | string | null
+    ice?: StringNullableWithAggregatesFilter<"CompanySettings"> | string | null
+    message?: StringNullableWithAggregatesFilter<"CompanySettings"> | string | null
+  }
+
   export type UserCreateInput = {
     id?: string
     username: string
@@ -16753,6 +17814,76 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
   }
 
+  export type CompanySettingsCreateInput = {
+    id?: string
+    name: string
+    address?: string | null
+    phone?: string | null
+    email?: string | null
+    ice?: string | null
+    message?: string | null
+  }
+
+  export type CompanySettingsUncheckedCreateInput = {
+    id?: string
+    name: string
+    address?: string | null
+    phone?: string | null
+    email?: string | null
+    ice?: string | null
+    message?: string | null
+  }
+
+  export type CompanySettingsUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    ice?: NullableStringFieldUpdateOperationsInput | string | null
+    message?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type CompanySettingsUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    ice?: NullableStringFieldUpdateOperationsInput | string | null
+    message?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type CompanySettingsCreateManyInput = {
+    id?: string
+    name: string
+    address?: string | null
+    phone?: string | null
+    email?: string | null
+    ice?: string | null
+    message?: string | null
+  }
+
+  export type CompanySettingsUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    ice?: NullableStringFieldUpdateOperationsInput | string | null
+    message?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type CompanySettingsUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    ice?: NullableStringFieldUpdateOperationsInput | string | null
+    message?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
   export type StringFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[]
@@ -17470,6 +18601,36 @@ export namespace Prisma {
   export type FabricMinOrderByAggregateInput = {
     id?: SortOrder
     name?: SortOrder
+  }
+
+  export type CompanySettingsCountOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    address?: SortOrder
+    phone?: SortOrder
+    email?: SortOrder
+    ice?: SortOrder
+    message?: SortOrder
+  }
+
+  export type CompanySettingsMaxOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    address?: SortOrder
+    phone?: SortOrder
+    email?: SortOrder
+    ice?: SortOrder
+    message?: SortOrder
+  }
+
+  export type CompanySettingsMinOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    address?: SortOrder
+    phone?: SortOrder
+    email?: SortOrder
+    ice?: SortOrder
+    message?: SortOrder
   }
 
   export type SaleCreateNestedManyWithoutUserInput = {
@@ -20346,6 +21507,10 @@ export namespace Prisma {
      * @deprecated Use FabricDefaultArgs instead
      */
     export type FabricArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = FabricDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use CompanySettingsDefaultArgs instead
+     */
+    export type CompanySettingsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = CompanySettingsDefaultArgs<ExtArgs>
 
   /**
    * Batch Payload for updateMany & deleteMany & createMany
