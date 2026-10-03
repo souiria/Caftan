@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain } from 'electron'
+import { app, BrowserWindow, ipcMain, Menu } from 'electron'
 import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
@@ -48,6 +48,10 @@ function createWindow() {
       webSecurity: false 
     }
   })
+
+  // === DÉSACTIVER LE MENU SUPÉRIEUR ===
+  Menu.setApplicationMenu(null)
+
   win.maximize()
   if (isDev) win.webContents.openDevTools()
   if (VITE_DEV_SERVER_URL) {
@@ -96,6 +100,9 @@ function setupDatabaseIPC() {
   ipcMain.removeHandler('add-customer')
   ipcMain.removeHandler('update-customer')
   ipcMain.removeHandler('delete-customer')
+
+  ipcMain.removeHandler('get-company')
+  ipcMain.removeHandler('update-company')
 
   // =========================================================
   // GESTION DES FICHIERS
@@ -342,8 +349,7 @@ function setupDatabaseIPC() {
   ipcMain.handle('update-customer', async (_, data) => { const { id, ...rest } = data; return await prisma.customer.update({ where: { id }, data: rest }) })
   ipcMain.handle('delete-customer', async (_, id) => await prisma.customer.delete({ where: { id } }))
 
-} // FIN DE setupDatabaseIPC() ✅ (C'est ici que l'accolade devait être)
-// =========================================================
+  // =========================================================
   // GESTION DU PROFIL DE L'ENTREPRISE
   // =========================================================
   ipcMain.handle('get-company', async () => {
@@ -361,5 +367,8 @@ function setupDatabaseIPC() {
       create: { id: "1", ...data }
     })
   })
+
+} // ✅ L'accolade de fermeture est maintenant à la toute fin de tous les ipcMain.handle
+
 app.on('window-all-closed', () => { if (process.platform !== 'darwin') app.quit() })
 app.whenReady().then(() => { setupDatabaseIPC(); createWindow() })
