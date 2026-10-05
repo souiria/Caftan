@@ -23,7 +23,7 @@ const MenuIcons = {
   Reports: () => <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>,
   Settings: () => <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>,
   Store: () => <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>,
-  MenuToggle: () => <svg className="w-6 h-6 text-slate-400 hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h7" /></svg>
+  MenuToggle: () => <svg className="w-6 h-6 text-slate-400 hover:text-amber-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h7" /></svg>
 }
 
 export default function App() {
@@ -33,8 +33,6 @@ export default function App() {
   })
   
   const [currentScreen, setCurrentScreen] = useState('dashboard')
-  
-  // 🔴 NOUVEL ÉTAT : Contrôle l'ouverture/fermeture du menu
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
 
   const handleLogin = (user: any) => {
@@ -70,53 +68,52 @@ export default function App() {
 
   const NavButton = ({ id, label, icon, isAdminSection = false }: any) => {
     const isActive = currentScreen === id
-    // Si le menu est fermé, on centre l'icône et on enlève le padding latéral
     const baseClasses = `w-full rounded-xl font-bold transition-all duration-200 flex items-center group relative overflow-hidden ${isSidebarOpen ? 'px-4 py-3.5 gap-3 justify-start' : 'p-3.5 justify-center'}`
     
+    // Style Admin (Or/Ambre) vs Style Employé (Émeraude) basé sur le logo
     const activeClasses = isAdminSection 
-      ? "bg-gradient-to-r from-emerald-600 to-teal-500 text-white shadow-lg shadow-emerald-900/50 translate-x-1" 
-      : "bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-lg shadow-indigo-900/50 translate-x-1"
+      ? "bg-gradient-to-r from-amber-600 to-yellow-500 text-slate-900 shadow-lg shadow-amber-900/30 translate-x-1" 
+      : "bg-gradient-to-r from-[#043927] to-emerald-700 text-white shadow-lg shadow-emerald-900/50 translate-x-1"
       
-    const inactiveClasses = "text-slate-400 hover:bg-slate-800 hover:text-white hover:translate-x-1"
+    const inactiveClasses = "text-slate-400 hover:bg-slate-800 hover:text-amber-500 hover:translate-x-1"
 
     return (
       <button 
         onClick={() => setCurrentScreen(id)} 
         className={`${baseClasses} ${isActive ? activeClasses : inactiveClasses}`}
-        title={!isSidebarOpen ? label : ''} // Affiche une infobulle quand le menu est fermé
+        title={!isSidebarOpen ? label : ''} 
       >
-        {isActive && <div className="absolute left-0 top-0 bottom-0 w-1 bg-white/30 rounded-r-md"></div>}
+        {isActive && <div className={`absolute left-0 top-0 bottom-0 w-1 ${isAdminSection ? 'bg-slate-900/30' : 'bg-white/30'} rounded-r-md`}></div>}
         <div className={`transition-transform duration-200 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`}>
           {icon}
         </div>
-        {/* On masque le texte si la sidebar est fermée */}
         {isSidebarOpen && <span className="tracking-wide text-sm whitespace-nowrap">{label}</span>}
       </button>
     )
   }
 
   return (
-    <div className="flex h-screen bg-slate-50 text-slate-800 font-sans overflow-hidden">
+    <div className="flex h-screen bg-[#F8F9FA] text-slate-800 font-sans overflow-hidden">
       <Toaster position="top-center" reverseOrder={false} />
       
-      {/* SIDEBAR DYNAMIQUE (w-72 ouvert, w-20 fermé) */}
-      <div className={`${isSidebarOpen ? 'w-72' : 'w-20'} transition-all duration-300 ease-in-out bg-[#0B1120] text-white flex flex-col shadow-2xl z-10 print:hidden relative border-r border-slate-800/50`}>
+      {/* SIDEBAR DYNAMIQUE */}
+      <div className={`${isSidebarOpen ? 'w-72' : 'w-20'} transition-all duration-300 ease-in-out bg-[#07130F] text-white flex flex-col shadow-2xl z-10 print:hidden relative border-r border-emerald-900/30`}>
         
-        {/* EN-TÊTE LOGO + BOUTON TOGGLE */}
+        {/* EN-TÊTE LOGO (Affiche l'image du logo) */}
         <div className={`p-4 flex items-center ${isSidebarOpen ? 'justify-between' : 'justify-center flex-col gap-4'}`}>
           <div className="flex items-center gap-3 overflow-hidden">
-            <div className="w-10 h-10 shrink-0 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-900/50">
-              <span className="text-xl font-black text-white">C</span>
-            </div>
-            {isSidebarOpen && (
-              <div className="animate-in fade-in slide-in-from-left-2 duration-300">
-                <h1 className="text-xl font-black text-white tracking-widest uppercase leading-tight">CAFTAN</h1>
-                <p className="text-[9px] text-indigo-400 font-bold tracking-[0.2em]">STORE MANAGER</p>
+            {isSidebarOpen ? (
+              <div className="bg-[#FAF9F6] p-1.5 rounded-xl shadow-inner animate-in fade-in duration-300">
+                <img src="/logo.jpg" alt="Dar Al Caftan" className="h-16 w-auto object-contain rounded-lg" />
+              </div>
+            ) : (
+              <div className="bg-[#FAF9F6] p-1 rounded-xl shadow-inner">
+                <img src="/logo.jpg" alt="Logo" className="w-10 h-10 object-cover rounded-lg" />
               </div>
             )}
           </div>
           
-          <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="p-1.5 rounded-lg hover:bg-slate-800 transition-colors">
+          <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="p-1.5 rounded-lg hover:bg-emerald-900/50 transition-colors">
             <MenuIcons.MenuToggle />
           </button>
         </div>
@@ -125,18 +122,18 @@ export default function App() {
         <div className="flex-1 overflow-y-auto px-3 py-2 space-y-1 custom-scrollbar overflow-x-hidden">
           
           {isSidebarOpen ? (
-            <p className="text-[10px] font-black tracking-widest text-slate-500 uppercase mb-3 ml-2 mt-2">Général</p>
+            <p className="text-[10px] font-black tracking-widest text-emerald-600/70 uppercase mb-3 ml-2 mt-2">Général</p>
           ) : (
-            <div className="h-4"></div> // Espacement
+            <div className="h-4"></div>
           )}
           
           <NavButton id="dashboard" label="Tableau de Bord" icon={<MenuIcons.Dashboard />} />
           <NavButton id="pos" label="Vente (Caisse)" icon={<MenuIcons.POS />} />
           <NavButton id="rentals" label="Location & Planning" icon={<MenuIcons.Rentals />} />
           
-          <div className="my-4 border-t border-slate-800/50 mx-2"></div>
+          <div className="my-4 border-t border-emerald-900/30 mx-2"></div>
           
-          {isSidebarOpen && <p className="text-[10px] font-black tracking-widest text-slate-500 uppercase mb-3 ml-2">Inventaire</p>}
+          {isSidebarOpen && <p className="text-[10px] font-black tracking-widest text-emerald-600/70 uppercase mb-3 ml-2">Inventaire</p>}
           
           <NavButton id="stock" label="État du Stock" icon={<MenuIcons.Stock />} />
           <NavButton id="products" label="Produits & Variantes" icon={<MenuIcons.Products />} />
@@ -145,10 +142,10 @@ export default function App() {
           {/* ADMINISTRATION (SUPER_ADMIN) */}
           {currentUser.role === 'SUPER_ADMIN' && (
             <div className="mt-4 mb-4">
-              <div className="h-px w-full bg-slate-800 mb-4"></div>
+              <div className="h-px w-full bg-emerald-900/30 mb-4"></div>
               {isSidebarOpen && (
-                <p className="text-[10px] font-black tracking-widest text-emerald-500/70 uppercase mb-3 ml-2 flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Administration
+                <p className="text-[10px] font-black tracking-widest text-amber-500/70 uppercase mb-3 ml-2 flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Administration
                 </p>
               )}
               <div className="space-y-1">
@@ -162,15 +159,15 @@ export default function App() {
         </div>
 
         {/* PROFIL EN BAS */}
-        <div className={`p-3 m-3 rounded-2xl bg-slate-800/50 border border-slate-700/50 flex items-center backdrop-blur-sm ${isSidebarOpen ? 'justify-between' : 'justify-center flex-col gap-3'}`}>
+        <div className={`p-3 m-3 rounded-2xl bg-[#0A1B15] border border-emerald-900/40 flex items-center backdrop-blur-sm ${isSidebarOpen ? 'justify-between' : 'justify-center flex-col gap-3'}`}>
           <div className={`flex items-center gap-3 ${!isSidebarOpen && 'justify-center'}`}>
-            <div className={`w-9 h-9 shrink-0 rounded-xl flex items-center justify-center font-black text-sm shadow-inner ${currentUser.role === 'SUPER_ADMIN' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30'}`}>
+            <div className={`w-9 h-9 shrink-0 rounded-xl flex items-center justify-center font-black text-sm shadow-inner ${currentUser.role === 'SUPER_ADMIN' ? 'bg-amber-500/20 text-amber-500 border border-amber-500/30' : 'bg-emerald-500/20 text-emerald-500 border border-emerald-500/30'}`}>
               {currentUser.username.charAt(0).toUpperCase()}
             </div>
             {isSidebarOpen && (
               <div className="overflow-hidden animate-in fade-in duration-300">
                 <p className="font-bold text-sm text-white truncate max-w-[100px] leading-tight">{currentUser.username}</p>
-                <p className="text-[9px] text-slate-400 font-bold tracking-widest uppercase mt-0.5">{currentUser.role === 'SUPER_ADMIN' ? 'Administrateur' : 'Employé'}</p>
+                <p className="text-[9px] text-emerald-600 font-bold tracking-widest uppercase mt-0.5">{currentUser.role === 'SUPER_ADMIN' ? 'Administrateur' : 'Employé'}</p>
               </div>
             )}
           </div>
@@ -181,7 +178,7 @@ export default function App() {
       </div>
 
       {/* ZONE DYNAMIQUE */}
-      <div className="flex-1 overflow-y-auto p-10 relative custom-scrollbar bg-slate-50">
+      <div className="flex-1 overflow-y-auto p-10 relative custom-scrollbar bg-[#F8F9FA]">
         {renderScreen()}
       </div>
     </div>

@@ -300,29 +300,33 @@ function setupDatabaseIPC() {
     })
   })
 
-  // =========================================================
+// =========================================================
   // TABLEAU DE BORD ET RAPPORTS
   // =========================================================
   ipcMain.handle('get-dashboard-stats', async (_, data) => {
     const { userId, role } = data || {}
     const today = new Date(); today.setHours(0, 0, 0, 0)
     const salesWhere = role === 'SUPER_ADMIN' ? {} : { userId: userId }
-    const todaySales = await prisma.sale.findMany({ where: { ...salesWhere, createdAt: { gte: today }, status: { in: ['COMPLETED', 'PENDING_DELIVERY'] } } })
+    
+    // 🔴 AJOUT : On inclut les CANCELLED
+    const todaySales = await prisma.sale.findMany({ where: { ...salesWhere, createdAt: { gte: today }, status: { in: ['COMPLETED', 'PENDING_DELIVERY', 'CANCELLED'] } } })
     const activeRentals = await prisma.reservation.findMany({ where: { status: 'ACTIVE_RENT' }, include: { customer: true, items: { include: { stockItem: { include: { variant: { include: { product: true } } } } } } } })
     const recentSales = await prisma.sale.findMany({ where: salesWhere, orderBy: { createdAt: 'desc' }, take: 10, include: { user: true } })
 
     return {
-      todayRevenue: todaySales.reduce((acc: number, sale: any) => acc + sale.finalAmount, 0),
+      // 🔴 CALCUL : Si annulée, on ne compte que l'avance. Sinon, le montant final.
+      todayRevenue: todaySales.reduce((acc: number, sale: any) => acc + (sale.status === 'CANCELLED' ? sale.advanceAmount : sale.finalAmount), 0),
       activeRentalsCount: activeRentals.length,
       totalStock: await prisma.stockItem.count({ where: { status: 'AVAILABLE' } }),
       lateRentals: activeRentals.filter((r: any) => new Date(r.endDate).getTime() < new Date().getTime()),
-      recentActivity: recentSales.map((s: any) => ({ type: 'SALE', title: `Vente ${s.ticketNumber}`, date: s.createdAt, amount: s.finalAmount }))
+      recentActivity: recentSales.map((s: any) => ({ type: 'SALE', title: `Vente ${s.ticketNumber}`, date: s.createdAt, amount: s.status === 'CANCELLED' ? s.advanceAmount : s.finalAmount }))
     }
   })
 
   ipcMain.handle('get-reports-data', async (_, data) => {
     const { startDate, endDate, userId } = data
-    let whereClause: any = { status: { in: ['COMPLETED', 'PENDING_DELIVERY'] } }
+    // 🔴 AJOUT : On inclut les CANCELLED dans la recherche
+    let whereClause: any = { status: { in: ['COMPLETED', 'PENDING_DELIVERY', 'CANCELLED'] } }
     if (startDate && endDate) whereClause.createdAt = { gte: new Date(`${startDate}T00:00:00.000Z`), lte: new Date(`${endDate}T23:59:59.999Z`) }
     if (userId && userId !== 'ALL') whereClause.userId = userId
     return {

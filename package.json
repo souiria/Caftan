@@ -48,12 +48,15 @@
     },
     "files": [
       "dist/**/*",
-      "dist-electron/**/*"
+      "dist-electron/**/*",
+      "package.json",
+      "prisma/**/*"
+    ],
+    "asarUnpack": [
+      "prisma/**/*"
     ],
     "extraResources": [
-      "prisma/**/*",
-      "node_modules/.prisma/**/*",
-      "node_modules/@prisma/client/**/*"
+      "prisma/dev.db"
     ],
     "win": {
       "target": [
