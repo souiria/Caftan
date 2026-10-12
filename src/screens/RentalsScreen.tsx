@@ -142,13 +142,8 @@ export default function RentalsScreen() {
   // ==========================================
   const openReturnModal = (rental: any) => {
     setSelectedRental(rental); setConfirmCin('');
-    const expectedReturn = new Date(rental.endDate)
-    const today = new Date()
-    today.setHours(0, 0, 0, 0); expectedReturn.setHours(0, 0, 0, 0)
-    const diffTime = today.getTime() - expectedReturn.getTime()
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-    
-    setLateFee(diffDays > 0 ? diffDays * 50 : 0) // 50 DH de pénalité par jour par défaut
+    // Aucun tarif de retard n’est présumé : le montant reste à zéro jusqu’à saisie explicite.
+    setLateFee(0)
     setIsReturnModalOpen(true)
   }
 
