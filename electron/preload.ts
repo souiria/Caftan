@@ -11,6 +11,7 @@ try {
     // AUTHENTIFICATION & UTILISATEURS
     // ==========================================
     login: (credentials: any) => ipcRenderer.invoke('login', credentials),
+    logout: () => ipcRenderer.invoke('logout'),
     getUsers: () => ipcRenderer.invoke('get-users'),
     createUser: (data: any) => ipcRenderer.invoke('create-user', data),
     updateUser: (data: any) => ipcRenderer.invoke('update-user', data),

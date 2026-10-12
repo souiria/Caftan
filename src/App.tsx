@@ -27,10 +27,8 @@ const MenuIcons = {
 }
 
 export default function App() {
-  const [currentUser, setCurrentUser] = useState<any>(() => {
-    const savedUser = sessionStorage.getItem('caftan_current_user')
-    return savedUser ? JSON.parse(savedUser) : null
-  })
+  // A renderer-stored identity is display data only; it must never restore an IPC session.
+  const [currentUser, setCurrentUser] = useState<any>(null)
   
   const [currentScreen, setCurrentScreen] = useState('dashboard')
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
@@ -41,6 +39,7 @@ export default function App() {
   }
 
   const handleLogout = () => {
+    void (window as any).api.logout()
     setCurrentUser(null)
     sessionStorage.removeItem('caftan_current_user')
     setCurrentScreen('dashboard')
